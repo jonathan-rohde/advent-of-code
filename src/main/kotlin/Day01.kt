@@ -1,13 +1,14 @@
 import utils.println
 import utils.readInput
+import utils.toIntList
 import kotlin.math.abs
 
 fun main() {
 
     fun parseLists(input: List<String>): Pair<List<Int>, List<Int>> {
         return input.map {
-            val parts = it.split("\\s+".toRegex())
-            parts[0].toInt() to parts[1].toInt()
+            val parts = it.toIntList()
+            parts[0] to parts[1]
         }
             .toList()
             .unzip()
