@@ -14,6 +14,22 @@ fun main() {
         return mistakes
     }
 
+    fun isSafeTolerant(input: String): Boolean {
+        if (isSafe(input)) {
+            return true
+        }
+        val levels = input.toIntList()
+        levels.forEachIndexed { index, level ->
+            val newLevels = levels.toMutableList()
+            newLevels.removeAt(index)
+            if (isSafe(newLevels.joinToString(" "))) {
+                return true
+            }
+
+        }
+        return false
+    }
+
     fun part1(input: List<String>): Int {
         return input
             .filter { it.isNotEmpty() }
@@ -23,12 +39,17 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        return input.size
+        return input
+            .filter { it.isNotEmpty() }
+            .count {
+                isSafeTolerant(it)
+            }
     }
 
     // Or read a large test input from the `src/DayXX_test.txt` file:
     val testInput = readInput("Day02_test")
     check(part1(testInput) == 2)
+    check(part2(testInput) == 4)
 
     // Read the input from the `src/main/resources/DayXX.txt` file.
     val input = readInput("Day02")
