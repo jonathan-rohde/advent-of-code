@@ -1,10 +1,14 @@
+import utils.isSorted
+import utils.println
+import utils.readInput
+import utils.toIntList
 import kotlin.math.abs
 
 fun main() {
-    fun isSafe(input: String): Boolean {
-        val levels = input.toIntList()
-        val increment = levels[0] < levels[levels.size - 1]
-        val mistakes = input.toIntList().zipWithNext().all {
+    fun isSafe(input: List<Int>): Boolean {
+        if (!input.isSorted()) return false
+        val increment = input[0] < input[input.size - 1]
+        val mistakes = input.zipWithNext().all {
             if (increment) {
                 it.first < it.second && abs(it.first - it.second) <= 3
             } else {
@@ -14,15 +18,14 @@ fun main() {
         return mistakes
     }
 
-    fun isSafeTolerant(input: String): Boolean {
+    fun isSafeTolerant(input: List<Int>): Boolean {
         if (isSafe(input)) {
             return true
         }
-        val levels = input.toIntList()
-        levels.forEachIndexed { index, level ->
-            val newLevels = levels.toMutableList()
+        input.forEachIndexed { index, _ ->
+            val newLevels = input.toMutableList()
             newLevels.removeAt(index)
-            if (isSafe(newLevels.joinToString(" "))) {
+            if (isSafe(newLevels)) {
                 return true
             }
 
@@ -33,6 +36,7 @@ fun main() {
     fun part1(input: List<String>): Int {
         return input
             .filter { it.isNotEmpty() }
+            .map { it.toIntList() }
             .count {
                 isSafe(it)
             }
@@ -41,6 +45,7 @@ fun main() {
     fun part2(input: List<String>): Int {
         return input
             .filter { it.isNotEmpty() }
+            .map { it.toIntList() }
             .count {
                 isSafeTolerant(it)
             }
