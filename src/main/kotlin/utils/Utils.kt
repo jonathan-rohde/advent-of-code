@@ -27,5 +27,5 @@ fun Any?.println() = println(this)
  */
 fun String.toIntList(): List<Int> {
     if (this.isEmpty()) return emptyList()
-    return this.split("\\s+".toRegex()).map { it.toInt() }
+    return this.split("\\s+|,".toRegex()).map { it.toInt() }
 }
