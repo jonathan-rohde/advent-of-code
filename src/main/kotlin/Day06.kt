@@ -8,18 +8,56 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        return input.size
+        val map = parseMap(input)
+        val original = map.copy()
+        map.solve()
+        var possibleSolutions = 0
+        for (y in map.indices) {
+            for (x in map[y].indices) {
+                val replacement = original.copy()
+                if (replacement[y][x].state == TILE.EMPTY) {
+                    replacement[y][x].state = TILE.OBSTACLE
+                    val solution = replacement.solve()
+                    if (solution == -1) {
+                        possibleSolutions++
+                    }
+                }
+            }
+        }
+        return possibleSolutions
     }
 
     val testInput = readInput("Day06_test")
-//    check(part1(testInput) == 1)
-    part1(testInput).println()
-//    part2(testInput).println()
+    val testOutput1 = part1(testInput)
+    val testOutput2 = part2(testInput)
+    check(testOutput1 == 41)
+    timed {
+        testOutput1.println()
+    }
+    timed {
+        testOutput2.println()
+    }
 
     // Read the input from the `src/DayXX.txt` file.
     val input = readInput("Day06")
-    part1(input).println()
-//    part2(input).println()
+    timed {
+        part1(input).println()
+    }
+    timed {
+        part2(input).println()
+    }
+}
+
+private fun List<MutableList<Point>>.copy(): List<MutableList<Point>> {
+    val copy = mutableListOf<MutableList<Point>>()
+    forEach { row ->
+        val newRow = mutableListOf<Point>()
+        row.forEach { point ->
+            newRow.add(point.copy(visitedDirections = mutableListOf()))
+        }
+        copy.add(newRow)
+    }
+    return copy.toList()
 }
 
 private fun parseMap(input: List<String>): List<MutableList<Point>> {
@@ -39,52 +77,42 @@ private fun List<List<Point>>.findPlayer(): Pair<Int, Int> {
     throw IllegalArgumentException("Player not found")
 }
 
-private fun List<MutableList<Point>>.next(x: Int, y: Int): Pair<Pair<Int, Int>, Direction>? {
-    if (!validate(x, y, this)) {
-        return null
-    }
-    var direction = this[y][x].direction ?: throw IllegalArgumentException("Direction not found")
-    var newPositions = when (direction) {
+private fun next(x: Int, y: Int, direction: Direction): Pair<Int, Int> {
+    val newPositions = when (direction) {
         Direction.NORTH -> Pair(x, y - 1)
         Direction.EAST -> Pair(x + 1, y)
         Direction.SOUTH -> Pair(x, y + 1)
         Direction.WEST -> Pair(x - 1, y)
     }
-    if (validate(newPositions.first, newPositions.second, this)) {
-        if (this[newPositions.second][newPositions.first].state == TILE.OBSTACLE) {
-            direction = direction.turn()
-            newPositions = when (direction) {
-                Direction.NORTH -> Pair(x, y - 1)
-                Direction.EAST -> Pair(x + 1, y)
-                Direction.SOUTH -> Pair(x, y + 1)
-                Direction.WEST -> Pair(x - 1, y)
-            }
-        }
-    }
 
-    return newPositions to direction
+    return newPositions
 }
 
 private fun List<MutableList<Point>>.solve(): Int {
     val map = this.toMutableList()
     var (x, y) = map.findPlayer()
-    var visited = 0
+    var direction = map[y][x].direction ?: throw IllegalArgumentException("Direction not found")
 
     while(true) {
-        val next = map.next(x, y) ?: break
-        val coord = next.first
-        val direction = next.second
-        map[y][x].state = TILE.VISITED
-        if (!validate(coord.first, coord.second, map)) {
+        if (map[y][x].visitedDirections.contains(direction)) {
+            return -1
+        } else {
+             map[y][x].visitedDirections.add(direction)
+        }
+        val next = next(x, y, direction)
+        if (!validate(next.first, next.second, map)) {
             break
         }
-        map[coord.second][coord.first].direction = direction
-        visited++
-        x = coord.first
-        y = coord.second
+        if (map[next.second][next.first].state == TILE.OBSTACLE) {
+            direction = direction.turn()
+        } else {
+            map[y][x].state = TILE.VISITED
+            x = next.first
+            y = next.second
+        }
     }
 
-    return this.sumOf { row -> row.count { it.state == TILE.VISITED } }
+    return this.sumOf { row -> row.count { it.state == TILE.VISITED } } + 1
 }
 
 private fun validate(x: Int, y: Int, map: List<List<Point>>) : Boolean{
@@ -117,7 +145,9 @@ enum class Direction {
 
 data class Point(
     var state: TILE,
-    var direction: Direction? = null
+    var direction: Direction? = null,
+    var visitedDirections: MutableList<Direction> = mutableListOf(),
+    var breaker: Boolean = false
 ) {
     companion object {
         fun fromChar(char: Char): Point = when (char) {
@@ -143,4 +173,11 @@ enum class TILE {
     OBSTACLE,
     VISITED,
     PLAYER;
+}
+
+private fun timed(block: () -> Unit) {
+    val start = System.currentTimeMillis()
+    block()
+    val end = System.currentTimeMillis()
+    println("Execution time: ${end - start}ms")
 }
