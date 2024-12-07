@@ -29,3 +29,11 @@ fun String.toIntList(): List<Int> {
     if (this.isEmpty()) return emptyList()
     return this.split("\\s+|,".toRegex()).map { it.toInt() }
 }
+
+/**
+ * Parse string into list of longs
+ */
+fun String.toLongList(): List<Long> {
+    if (this.isEmpty()) return emptyList()
+    return this.split("\\s+|,".toRegex()).map { it.toLong() }
+}
