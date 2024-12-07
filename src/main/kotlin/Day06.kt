@@ -1,5 +1,6 @@
 import utils.println
 import utils.readInput
+import kotlin.time.measureTimedValue
 
 fun main() {
     fun part1(input: List<String>): Int {
@@ -12,15 +13,18 @@ fun main() {
         val original = map.copy()
         map.solve()
         var possibleSolutions = 0
-        for (y in map.indices) {
-            for (x in map[y].indices) {
-                val replacement = original.copy()
-                if (replacement[y][x].state == TILE.EMPTY) {
-                    replacement[y][x].state = TILE.OBSTACLE
-                    val solution = replacement.solve()
-                    if (solution == -1) {
-                        possibleSolutions++
-                    }
+        val possiblePlacements = map.flatMapIndexed { y, points ->
+            List(points.size) { x ->
+                Pair(x, y)
+            }
+        }.toList()
+        possiblePlacements.parallelStream().forEach { (x, y) ->
+            val replacement = original.copy()
+            if (replacement[y][x].state == TILE.EMPTY) {
+                replacement[y][x].state = TILE.OBSTACLE
+                val solution = replacement.solve()
+                if (solution == -1) {
+                    possibleSolutions++
                 }
             }
         }
@@ -30,22 +34,23 @@ fun main() {
     val testInput = readInput("Day06_test")
     val testOutput1 = part1(testInput)
     val testOutput2 = part2(testInput)
+    testOutput1.println()
     check(testOutput1 == 41)
-    timed {
+    measureTimedValue {
         testOutput1.println()
-    }
-    timed {
+    }.println()
+    measureTimedValue {
         testOutput2.println()
-    }
+    }.println()
 
     // Read the input from the `src/DayXX.txt` file.
     val input = readInput("Day06")
-    timed {
+    measureTimedValue {
         part1(input).println()
-    }
-    timed {
+    }.println()
+    measureTimedValue {
         part2(input).println()
-    }
+    }.println()
 }
 
 private fun List<MutableList<Point>>.copy(): List<MutableList<Point>> {
@@ -92,12 +97,13 @@ private fun List<MutableList<Point>>.solve(): Int {
     val map = this.toMutableList()
     var (x, y) = map.findPlayer()
     var direction = map[y][x].direction ?: throw IllegalArgumentException("Direction not found")
+    var visited = 0
 
-    while(true) {
+    while (true) {
         if (map[y][x].visitedDirections.contains(direction)) {
             return -1
         } else {
-             map[y][x].visitedDirections.add(direction)
+            map[y][x].visitedDirections.add(direction)
         }
         val next = next(x, y, direction)
         if (!validate(next.first, next.second, map)) {
@@ -106,16 +112,17 @@ private fun List<MutableList<Point>>.solve(): Int {
         if (map[next.second][next.first].state == TILE.OBSTACLE) {
             direction = direction.turn()
         } else {
+            visited++
             map[y][x].state = TILE.VISITED
             x = next.first
             y = next.second
         }
     }
 
-    return this.sumOf { row -> row.count { it.state == TILE.VISITED } } + 1
+    return visited - 3
 }
 
-private fun validate(x: Int, y: Int, map: List<List<Point>>) : Boolean{
+private fun validate(x: Int, y: Int, map: List<List<Point>>): Boolean {
     if (y !in map.indices || x !in map[y].indices) {
         return false
     }
