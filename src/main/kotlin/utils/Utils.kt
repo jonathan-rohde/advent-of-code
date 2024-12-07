@@ -4,6 +4,7 @@ import java.math.BigInteger
 import java.security.MessageDigest
 import kotlin.io.path.Path
 import kotlin.io.path.readText
+import kotlin.time.TimedValue
 
 /**
  * Reads lines from the given input txt file.
@@ -16,6 +17,10 @@ fun readInput(name: String) = Path("src/main/resources/$name.txt").readText().tr
 fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteArray()))
     .toString(16)
     .padStart(32, '0')
+
+fun TimedValue<Unit>.println() {
+    println("Duration: $duration")
+}
 
 /**
  * The cleaner shorthand for printing output.
