@@ -27,6 +27,15 @@ fun TimedValue<Unit>.println() {
  */
 fun Any?.println() = println(this)
 
+fun Any?.testAndPrint(checkValue: Any? = null) {
+    println()
+    if (checkValue != null) {
+        check(this == checkValue) {
+            "Check failed. Expected: $checkValue, actual: $this"
+        }
+    }
+}
+
 /**
  * Parse string into list of integers
  */
