@@ -18,7 +18,7 @@ fun main() {
 
     val testInput = readInput("Day10_test")
     part1(testInput).testAndPrint(36L)
-    part2(testInput).testAndPrint()
+    part2(testInput).testAndPrint(81L)
 
     val input = readInput("Day10")
     part1(input).testAndPrint()
