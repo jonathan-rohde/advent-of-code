@@ -11,7 +11,9 @@ fun main() {
     }
 
     fun part2(input: List<String>): Long {
-        return input.size.toLong()
+        val map = input.toMap()
+        val startingPositions = map.find(0)
+        return map.evaluations2(startingPositions)
     }
 
     val testInput = readInput("Day10_test")
@@ -43,6 +45,16 @@ private fun List<List<Int>>.evaluations(startingPositions: List<Pair<Int, Int>>)
         val trails = createPath(x, y)
             .map { path -> path[path.lastIndex] }
             .toSet()
+        evaluations += trails.size
+    }
+    return evaluations.toLong()
+}
+
+private fun List<List<Int>>.evaluations2(startingPositions: List<Pair<Int, Int>>): Long {
+    var evaluations = 0
+    for ((x, y) in startingPositions) {
+        val trails = createPath(x, y)
+            .distinct()
         evaluations += trails.size
     }
     return evaluations.toLong()
