@@ -41,29 +41,8 @@ fun main() {
     }
 }
 
-private fun Long.splitStone(steps: Int): List<Long> {
-    return splitStones(steps)
-}
-
-private fun Long.splitStones(stepsMissing: Int): List<Long> {
-    if (stepsMissing == 0) {
-        return listOf(this)
-    }
-    if (this == 0L) {
-        return listOf(1L).flatMap { it.splitStones(stepsMissing - 1) }
-    }
-    if (this.toString().length % 2 == 0) {
-        val string = this.toString()
-        val half = string.length / 2
-        val firstHalf = string.substring(0, half).toLong(10)
-        val secondHalf = string.substring(half).toLong(10)
-        return listOf(firstHalf, secondHalf).flatMap { it.splitStones(stepsMissing - 1) }
-    }
-    return listOf(this * 2024).flatMap { it.splitStones(stepsMissing - 1) }
-
-}
-
 val cache = mutableMapOf<Pair<Long, Int>, Triple<Int, List<Long>, Long>>()
+
 
 private fun Long.countSplitStone(steps: Int): Long {
     return countSplitStones(steps)
