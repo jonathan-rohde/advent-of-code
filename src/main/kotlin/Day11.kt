@@ -1,12 +1,13 @@
+import utils.println
 import utils.readInput
 import utils.testAndPrint
 import utils.toLongList
+import kotlin.time.measureTime
 
 fun main() {
     fun part1(input: List<String>): Long {
         return input.first().toLongList()
-            .flatMap { it.splitStone(25) }
-            .count().toLong()
+            .sumOf { it.countSplitStone(25) }
 
     }
 
@@ -16,12 +17,28 @@ fun main() {
     }
 
     val testInput = readInput("Day11_test")
-    part1(testInput).testAndPrint(55312L)
-    part2(testInput).testAndPrint()
+    measureTime {
+        part1(testInput)//.testAndPrint(55312L)
+    }.let {
+        println("Part 1 (Test): $it")
+    }
+    measureTime {
+        part2(testInput)//.testAndPrint()
+    }.let {
+        println("Part 2 (Test): $it")
+    }
 
     val input = readInput("Day11")
-    part1(input).testAndPrint()
-    part2(input).testAndPrint()
+    measureTime {
+        part1(input)//.testAndPrint()
+    }.let {
+        println("Part 1: $it")
+    }
+    measureTime {
+        part2(input)//.testAndPrint()
+    }.let {
+        println("Part 2: $it")
+    }
 }
 
 private fun Long.splitStone(steps: Int): List<Long> {
