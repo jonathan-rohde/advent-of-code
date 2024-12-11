@@ -41,7 +41,7 @@ fun main() {
     }
 }
 
-val cache = mutableMapOf<Pair<Long, Int>, Triple<Int, List<Long>, Long>>()
+val cache = mutableMapOf<Pair<Long, Int>, Long>()
 
 
 private fun Long.countSplitStone(steps: Int): Long {
@@ -50,13 +50,8 @@ private fun Long.countSplitStone(steps: Int): Long {
 
 private fun Long.countSplitStones(stepsMissing: Int): Long {
     if (cache.contains(Pair(this, stepsMissing))) {
-        val (cachedSteps, cachedList, cachedResult) = cache[Pair(this, stepsMissing)]!!
-        if (cachedSteps == stepsMissing) {
-            return cachedResult
-        }
-        if (cachedSteps < stepsMissing) {
-            return cachedList.sumOf { it.countSplitStones(stepsMissing - cachedSteps) }
-        }
+        val cachedResult = cache[Pair(this, stepsMissing)]!!
+        return cachedResult
     }
     if (stepsMissing == 0) {
         return 1
@@ -64,7 +59,7 @@ private fun Long.countSplitStones(stepsMissing: Int): Long {
     if (this == 0L) {
         val list = listOf(1L)
         val result = list.sumOf { it.countSplitStones(stepsMissing - 1) }
-        cache[Pair(0, stepsMissing)] = Triple(stepsMissing, list, result)
+        cache[Pair(0, stepsMissing)] = result
         return result
     }
     if (this.toString().length % 2 == 0) {
@@ -74,13 +69,13 @@ private fun Long.countSplitStones(stepsMissing: Int): Long {
         val secondHalf = string.substring(half).toLong(10)
         val list = listOf(firstHalf, secondHalf)
         val result = list.sumOf { it.countSplitStones(stepsMissing - 1) }
-        cache[Pair(this, stepsMissing)] = Triple(stepsMissing, list, result)
+        cache[Pair(this, stepsMissing)] = result
         return result
     }
 
     val list = listOf(this * 2024)
     val result = list.sumOf { it.countSplitStones(stepsMissing - 1) }
-    cache[Pair(this, stepsMissing)] = Triple(stepsMissing, list, result)
+    cache[Pair(this, stepsMissing)] = result
     return result
 
 }
