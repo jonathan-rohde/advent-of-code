@@ -77,50 +77,33 @@ private fun List<Pair<Int, Int>>.sides(garden: List<List<GardenCell>>): Int {
     }.sortedWith(
         compareBy({ it.second }, { it.first })
     )
-    val horizontalUp = list.groupBy { it.second }.values
-        .flatMap { row ->  row.filter {
-            cell ->
-                val up = cell.second - 1
-                up < 0 || garden[up][cell.first].indicator != indicator
-            }
-            .map { it.first }
-            .chunkByIncrement( 1)
-        }
-        .filter { it.isNotEmpty() }
-    val horizontalDown = list.groupBy { it.second }.values
-        .flatMap { row ->  row.filter {
-            cell ->
-                val down = cell.second + 1
-                down > garden.lastIndex || garden[down][cell.first].indicator != indicator
-            }
-            .map { it.first }
-            .chunkByIncrement( 1)
-        }
-        .filter { it.isNotEmpty() }
-    val verticalLeft = list.groupBy { it.first }.values
-        .flatMap { row ->  row.filter {
-                cell ->
-            val left = cell.first - 1
-            left < 0 ||garden[cell.second][left].indicator != indicator
-        }
-            .map { it.second }
-            .sorted()
-            .chunkByIncrement( 1)
-        }
-        .filter { it.isNotEmpty() }
-    val verticalRight = list.groupBy { it.first }.values
-        .flatMap { row ->  row.filter {
-                cell ->
-            val right = cell.first + 1
-            right > garden[0].lastIndex  || garden[cell.second][right].indicator != indicator
-        }
-            .map { it.second }
-            .sorted()
-            .chunkByIncrement( 1)
-        }
-        .filter { it.isNotEmpty() }
+    val horizontalUp = list.countSides(1, indicator, garden) { a, b ->
+        garden[a][b].indicator
+    }
+    val horizontalDown = list.countSides(-1, indicator, garden) {
+            a, b -> garden[a][b].indicator
+    }
+    val verticalLeft = list.map { Pair(it.second, it.first) }.countSides(1, indicator, garden) {
+            a, b -> garden[b][a].indicator
+    }
+    val verticalRight = list.map { Pair(it.second, it.first) }.countSides(-1, indicator, garden) {
+            a, b -> garden[b][a].indicator
+    }
 
-    return horizontalUp.count() + horizontalDown.count() + verticalLeft.count() + verticalRight.count()
+    return horizontalUp + horizontalDown + verticalLeft + verticalRight
+}
+
+private fun List<Pair<Int, Int>>.countSides(direction: Int, indicator: String, garden: List<List<GardenCell>>, neighbourValue: (a: Int, b: Int) -> String ): Int {
+    return groupBy { it.second }.values
+        .flatMap { row ->  row.filter {
+                cell ->
+            val neighbour = cell.second - direction
+            neighbour < 0 || neighbour >= garden.size || neighbourValue(neighbour, cell.first) != indicator
+        }
+            .map { it.first }
+            .chunkByIncrement( 1)
+        }
+        .count { it.isNotEmpty() }
 }
 
 private fun List<Int>.chunkByIncrement(increment: Int): List<List<Int>> {
@@ -141,7 +124,7 @@ private fun List<Int>.chunkByIncrement(increment: Int): List<List<Int>> {
     return result
 }
 
-private fun Pair<Int, Int>.isPerimeter(garden: List<List<GardenCell>>): Boolean {
+private fun Pair<Int, Int>.perimeter(garden: List<List<GardenCell>>): List<Pair<Int, Int>> {
     val (x, y) = this
     val indicator = garden[y][x].indicator
     return setOf(
@@ -149,27 +132,20 @@ private fun Pair<Int, Int>.isPerimeter(garden: List<List<GardenCell>>): Boolean 
         Pair(x + 1, y),
         Pair(x, y - 1),
         Pair(x, y + 1)
-    ).count { index ->
+    ).filter { index ->
         val (x1, y1) = index
         !(y1 in garden.indices && x1 in garden[y1].indices) ||
                 garden[y1][x1].indicator != indicator
-    } > 0
+    }
+}
+
+private fun Pair<Int, Int>.isPerimeter(garden: List<List<GardenCell>>): Boolean {
+    return perimeter(garden).isNotEmpty()
 }
 
 private fun List<Pair<Int, Int>>.perimeter(garden: List<List<GardenCell>>): Int {
     return sumOf {
-        val (x, y) = it
-        val indicator = garden[y][x].indicator
-        setOf(
-            Pair(x - 1, y),
-            Pair(x + 1, y),
-            Pair(x, y - 1),
-            Pair(x, y + 1)
-        ).count { index ->
-            val (x1, y1) = index
-            !(y1 in garden.indices && x1 in garden[y1].indices) ||
-            garden[y1][x1].indicator != indicator
-        }
+        it.perimeter(garden).size
     }
 }
 
