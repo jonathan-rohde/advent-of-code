@@ -1,6 +1,8 @@
+import utils.println
 import utils.readInput
 import utils.testAndPrint
 import kotlin.math.cos
+import kotlin.time.measureTime
 
 fun main() {
     fun part1(input: List<String>): Long {
@@ -16,12 +18,12 @@ fun main() {
     }
 
     val testInput = readInput("Day12_test")
-    part1(testInput).testAndPrint(1930L)
-    part2(testInput).testAndPrint(1206L)
+    measureTime { part1(testInput).testAndPrint(1930L) }.println()
+    measureTime { part2(testInput).testAndPrint(1206L) }.println()
 
     val input = readInput("Day12")
-    part1(input).testAndPrint()
-    part2(input).testAndPrint()
+    measureTime { part1(input).testAndPrint() }.println()
+    measureTime { part2(input).testAndPrint() }.println()
 }
 
 private fun List<String>.calculateCost(constFunc: (cell: List<Pair<Int, Int>>, garden: List<List<GardenCell>>) -> Int): Int {
