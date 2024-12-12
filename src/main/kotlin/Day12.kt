@@ -4,36 +4,15 @@ import kotlin.math.cos
 
 fun main() {
     fun part1(input: List<String>): Long {
-        val garden = input.parseGarden()
-        val areas = mutableSetOf<List<Pair<Int, Int>>>()
-        garden.forEachIndexed { y, row ->
-            row.forEachIndexed { x, cell ->
-                if (cell.consumed.not()) {
-                    areas.add(garden.findArea(x, y).toList())
-                }
-            }
-        }
-        val costs = areas.map {
-            it.size to it.perimeter(garden)
-        }
-        return costs.sumOf { it.first * it.second }.toLong()
+        return input.calculateCost { list, garden ->
+            list.perimeter(garden)
+        }.toLong()
     }
 
     fun part2(input: List<String>): Long {
-        val garden = input.parseGarden()
-        val areas = mutableSetOf<List<Pair<Int, Int>>>()
-        garden.forEachIndexed { y, row ->
-            row.forEachIndexed { x, cell ->
-                if (cell.consumed.not()) {
-                    areas.add(garden.findArea(x, y).toList())
-                }
-            }
-        }
-
-        val costs = areas.map {
-            it.size to it.sides(garden)
-        }
-        return costs.sumOf { it.first * it.second }.toLong()
+        return input.calculateCost {
+            list, garden -> list.sides(garden)
+        }.toLong()
     }
 
     val testInput = readInput("Day12_test")
@@ -43,6 +22,22 @@ fun main() {
     val input = readInput("Day12")
     part1(input).testAndPrint()
     part2(input).testAndPrint()
+}
+
+private fun List<String>.calculateCost(constFunc: (cell: List<Pair<Int, Int>>, garden: List<List<GardenCell>>) -> Int): Int {
+    val garden = parseGarden()
+    val areas = mutableSetOf<List<Pair<Int, Int>>>()
+    garden.forEachIndexed { y, row ->
+        row.forEachIndexed { x, cell ->
+            if (cell.consumed.not()) {
+                areas.add(garden.findArea(x, y).toList())
+            }
+        }
+    }
+    val costs = areas.map {
+        it.size to constFunc(it, garden)
+    }
+    return costs.sumOf { it.first * it.second }
 }
 
 private fun List<String>.parseGarden(): List<List<GardenCell>> {
