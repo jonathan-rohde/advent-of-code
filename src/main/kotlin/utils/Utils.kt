@@ -5,6 +5,7 @@ import java.security.MessageDigest
 import kotlin.io.path.Path
 import kotlin.io.path.readText
 import kotlin.time.TimedValue
+import kotlin.time.measureTime
 
 /**
  * Reads lines from the given input txt file.
@@ -35,6 +36,8 @@ fun Any?.testAndPrint(checkValue: Any? = null) {
         }
     }
 }
+
+fun measured(block: () -> Any?) = println("Duration: ${measureTime { block() }}")
 
 /**
  * Parse string into list of integers

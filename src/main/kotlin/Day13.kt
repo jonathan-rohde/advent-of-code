@@ -1,6 +1,7 @@
 import utils.LGS2x2
 import utils.Matrix2x2
 import utils.Vector2
+import utils.measured
 import utils.readInput
 import utils.testAndPrint
 import kotlin.math.roundToLong
@@ -11,12 +12,12 @@ fun main() {
     fun part2(input: List<String>): Long = puzzle(input = input, offset = 10000000000000)
 
     val testInput = readInput("Day13_test")
-    part1(testInput).testAndPrint(480L)
-    part2(testInput).testAndPrint()
+    measured { part1(testInput).testAndPrint(480L) }
+    measured { part2(testInput).testAndPrint() }
 
     val input = readInput("Day13")
-    part1(input).testAndPrint()
-    part2(input).testAndPrint()
+    measured { part1(input).testAndPrint() }
+    measured { part2(input).testAndPrint() }
 }
 
 fun puzzle(input: List<String>, offset: Long = 0): Long =
