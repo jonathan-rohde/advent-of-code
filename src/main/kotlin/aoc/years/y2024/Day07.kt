@@ -1,10 +1,11 @@
-import utils.println
-import utils.readInput
-import utils.toLongList
-import kotlin.time.measureTimedValue
+package aoc.years.y2024
 
-fun main() {
-    fun part1(input: List<String>): Long {
+import aoc.common.Day
+import aoc.common.printResults
+import utils.toLongList
+
+class Day07 : Day(2024, 7, 3749L to 11387L) {
+    override fun part1(input: List<String>): Long {
         return input.filter { it.isNotEmpty() }.sumOf {
             val (sum, parts) = readEquation(it)
             val result = parts.reversed().equation(0, sum)
@@ -16,7 +17,7 @@ fun main() {
         }
     }
 
-    fun part2(input: List<String>): Long {
+    override fun part2(input: List<String>): Long {
         return input.filter { it.isNotEmpty() }.sumOf {
             val (sum, parts) = readEquation(it)
             val result = parts.reversed().equation(0, sum, concat = true)
@@ -27,20 +28,10 @@ fun main() {
             }
         }
     }
+}
 
-    val testInput = readInput("Day07_test")
-    part1(testInput).let {
-        println(it)
-        check(it == 3749L) { it }
-    }
-
-    val input = readInput("Day07")
-    measureTimedValue {
-        part1(input).println()
-    }.println()
-    measureTimedValue {
-        part2(input).println()
-    }.println()
+fun main() {
+    Day07().execute().printResults()
 }
 
 private fun readEquation(input: String): Pair<Long, List<Long>> {

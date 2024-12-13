@@ -1,8 +1,15 @@
-import utils.println
-import utils.readInput
+package aoc.years.y2024
+
+import aoc.common.Day
+import aoc.common.printResults
 import utils.toIntList
 
-fun main() {
+class Day05 : Day(2024, 5, 143 to 123) {
+    override fun part1(input: List<String>): Int {
+        val (numbers, orders) = input.parse()
+        return part1(numbers, orders)
+    }
+
     fun part1(numbers: List<String>, orders: List<String>): Int {
         val afterRule = readPageNumbersAfter(numbers)
         val beforeRule = readPageNumbersBefore(numbers)
@@ -16,7 +23,8 @@ fun main() {
         }
     }
 
-    fun part2(numbers: List<String>, orders: List<String>): Int {
+    override fun part2(input: List<String>): Int {
+        val (numbers, orders) = input.parse()
         val afterRule = readPageNumbersAfter(numbers)
         val beforeRule = readPageNumbersBefore(numbers)
         return orders.sumOf {
@@ -28,18 +36,16 @@ fun main() {
             }
         }
     }
+}
 
-    // Or read a large test input from the `src/DayXX_test.txt` file:
-    val testNumbers = readInput("Day05_numbers_test")
-    val testOrders = readInput("Day05_orders_test")
-    check(part1(testNumbers, testOrders) == 143)
-    check(part2(testNumbers, testOrders) == 123)
+private fun List<String>.parse(): Pair<List<String>, List<String>> {
+    val numbers = takeWhile { it.isNotBlank() }
+    val orders = drop(numbers.size + 1)
+    return numbers to orders
+}
 
-    // Read the input from the `src/DayXX.txt` file.
-    val numbers = readInput("Day05_numbers")
-    val orders = readInput("Day05_orders")
-    part1(numbers, orders).println()
-    part2(numbers, orders).println()
+fun main() {
+    Day05().execute().printResults()
 }
 
 

@@ -1,17 +1,18 @@
-import utils.measured
-import utils.readInput
-import utils.testAndPrint
+package aoc.years.y2024
+
+import aoc.common.Day
+import aoc.common.printResults
 import utils.toLongList
 import kotlin.math.pow
 
-fun main() {
-    fun part1(input: List<String>): String {
+class Day17 : Day(2024, 17, "5,7,3,0" to 117440L) {
+    override fun part1(input: List<String>): String {
         val computer = input.parseComputer()
         computer.execute()
         return computer.output.joinToString(",")
     }
 
-    fun part2(input: List<String>): Long {
+    override fun part2(input: List<String>): Long {
         val computer = input.parseComputer()
         val ref = computer.program
 
@@ -36,15 +37,10 @@ fun main() {
 
         return valueForA
     }
+}
 
-    val testInput = readInput("Day17_test")
-    part1(testInput).testAndPrint("5,7,3,0")
-    part2(testInput).testAndPrint(117440L)
-
-    val input = readInput("Day17")
-    measured(1) { part1(input).testAndPrint() }
-    measured(2) { part2(input).testAndPrint() }
-
+fun main() {
+    Day17().execute().printResults()
 }
 
 private fun List<String>.parseComputer(): Computer {

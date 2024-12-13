@@ -1,19 +1,16 @@
-import utils.println
-import utils.readInput
+package aoc.years.y2024
+
+import aoc.common.Day
+import aoc.common.printResults
+
+class Day03 : Day(2024, 3, 161 to 48) {
+    override fun part1(input: List<String>): Int = input.joinToString(" ").calculate(true)
+
+    override fun part2(input: List<String>): Int = input.joinToString(" ").calculate(false)
+}
 
 fun main() {
-    fun part1(input: List<String>): Int = input.joinToString(" ").calculate(true)
-
-    fun part2(input: List<String>): Int = input.joinToString(" ").calculate(false)
-
-    val testInput = readInput("Day03_test")
-    check(part1(testInput) == 161)
-    check(part2(readInput("Day03_test2")) == 48)
-
-    // Read the input from the `src/DayXX.txt` file.
-    val input = readInput("Day03")
-    part1(input).println()
-    part2(input).println()
+    Day03().execute().printResults()
 }
 
 private fun String.calculate(enabled: Boolean = true): Int {

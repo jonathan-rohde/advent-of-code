@@ -1,31 +1,27 @@
-import utils.measured
-import utils.readInput
-import utils.testAndPrint
-import java.util.Comparator
+package aoc.years.y2024
 
-fun main() {
-    fun part1(input: List<String>): Long {
+import aoc.common.Day
+import aoc.common.printResults
+
+class Day15 : Day(2024, 15, 10092L to 9021L) {
+    override fun part1(input: List<String>): Long {
         val game = input.parseMap()
         val commands = input.parseCommands()
         game.execute(commands)
         return game.sumGps()
     }
 
-    fun part2(input: List<String>): Long {
+    override fun part2(input: List<String>): Long {
         val game = input.parseMap()
         game.expand()
         val commands = input.parseCommands()
         game.execute2(commands)
         return game.sumGps2()
     }
+}
 
-    val testInput = readInput("Day15_test")
-    part1(testInput).testAndPrint(10092L)
-    part2(testInput).testAndPrint(9021L)
-
-    val input = readInput("Day15")
-    measured(1) {  part1(input).testAndPrint() }
-    measured(2) { part2(input).testAndPrint() }
+fun main() {
+    Day15().execute().printResults()
 }
 
 private fun List<String>.parseMap(): Game {

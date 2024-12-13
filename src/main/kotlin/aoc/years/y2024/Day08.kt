@@ -1,39 +1,25 @@
-import utils.println
-import utils.readInput
-import utils.testAndPrint
-import kotlin.math.min
-import kotlin.time.measureTimedValue
+package aoc.years.y2024
 
-fun main() {
-    fun part1(input: List<String>): Int {
+import aoc.common.Day
+import aoc.common.printResults
+import kotlin.math.min
+
+class Day08 : Day(2024, 8, 14 to 34) {
+    override fun part1(input: List<String>): Int {
         val playingMap = input.parseMap(checkDistance = true)
         playingMap.fillAntinodes()
         return playingMap.countFrequencies()
     }
 
-    fun part2(input: List<String>): Int {
+    override fun part2(input: List<String>): Int {
         val playingMap = input.parseMap(checkDistance = false)
         playingMap.fillAntinodes()
         return playingMap.countFrequencies()
     }
+}
 
-    val testInput = readInput("Day08_test")
-    measureTimedValue {
-        val test1 = part1(testInput)
-        test1.testAndPrint(14)
-    }.println()
-    measureTimedValue {
-        val test2 = part2(testInput)
-        test2.testAndPrint(34)
-    }.println()
-
-    val input = readInput("Day08")
-    measureTimedValue {
-        part1(input).testAndPrint()
-    }.println()
-    measureTimedValue {
-        part2(input).testAndPrint()
-    }.println()
+fun main() {
+    Day08().execute().printResults()
 }
 
 private fun PlayingMap.countFrequencies() = map.sumOf { row ->

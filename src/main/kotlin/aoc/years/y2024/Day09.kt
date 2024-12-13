@@ -1,8 +1,10 @@
-import utils.readInput
-import utils.testAndPrint
+package aoc.years.y2024
 
-fun main() {
-    fun part1(input: List<String>): Long {
+import aoc.common.Day
+import aoc.common.printResults
+
+class Day09 : Day(2024, 9, 1928L to 2858L) {
+    override fun part1(input: List<String>): Long {
         return input.sumOf {
             val memory = it.createMemory()
             memory.fillGaps()
@@ -10,22 +12,17 @@ fun main() {
         }
     }
 
-    fun part2(input: List<String>): Long {
+    override fun part2(input: List<String>): Long {
         return input.sumOf {
             val memory = it.createMemory()
             memory.fillGapsWithBlocks()
             memory.checksum()
         }
     }
+}
 
-    val testInput = readInput("Day09_test")
-    part1(testInput).testAndPrint(1928L)
-    part2(testInput).testAndPrint(2858L)
-
-    // Read the input from the `src/DayXX.txt` file.
-    val input = readInput("Day09")
-    part1(input).testAndPrint()
-    part2(input).testAndPrint()
+fun main() {
+    Day09().execute().printResults()
 }
 
 private fun String.createMemory(): MutableList<Long?> {

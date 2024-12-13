@@ -1,29 +1,24 @@
-import utils.println
-import utils.readInput
-import utils.testAndPrint
-import kotlin.math.cos
-import kotlin.time.measureTime
+package aoc.years.y2024
 
-fun main() {
-    fun part1(input: List<String>): Long {
+import aoc.common.Day
+import aoc.common.printResults
+
+class Day12 : Day(2024, 12, 1930L to 1206L) {
+    override fun part1(input: List<String>): Long {
         return input.calculateCost { list, garden ->
             list.perimeter(garden)
         }.toLong()
     }
 
-    fun part2(input: List<String>): Long {
+    override fun part2(input: List<String>): Long {
         return input.calculateCost {
-            list, garden -> list.sides(garden)
+                list, garden -> list.sides(garden)
         }.toLong()
     }
+}
 
-    val testInput = readInput("Day12_test")
-    measureTime { part1(testInput).testAndPrint(1930L) }.println()
-    measureTime { part2(testInput).testAndPrint(1206L) }.println()
-
-    val input = readInput("Day12")
-    measureTime { part1(input).testAndPrint() }.println()
-    measureTime { part2(input).testAndPrint() }.println()
+fun main() {
+    Day12().execute().printResults()
 }
 
 private fun List<String>.calculateCost(constFunc: (cell: List<Pair<Int, Int>>, garden: List<List<GardenCell>>) -> Int): Int {
