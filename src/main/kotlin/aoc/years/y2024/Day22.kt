@@ -1,26 +1,24 @@
-import utils.readInput
-import utils.testAndPrint
+package aoc.years.y2024
 
-fun main() {
-    fun part1(input: List<String>): Long {
+import aoc.common.Day
+import aoc.common.printResults
+
+class Day22 : Day(2024, 22, 37327623L to 24L) {
+    override fun part1(input: List<String>): Long {
         return input.map { it.toLong() }.sumOf { it.calculateSecrets(2000)[2000] }
     }
 
-    fun part2(input: List<String>): Long {
+    override fun part2(input: List<String>): Long {
         return input.map { it.toLong() }
             .map {
                 it.calculateSecrets(2000)
             }
             .sellBananas()
     }
+}
 
-    val testInput = readInput("Day22_test")
-    part1(testInput).testAndPrint(37327623L)
-    part2(testInput).testAndPrint()
-
-    val input = readInput("Day22")
-    part1(input).testAndPrint()
-    part2(input).testAndPrint()
+fun main() {
+    Day22().execute().printResults()
 }
 
 private fun Long.calculateSecrets(count: Int): List<Long> {

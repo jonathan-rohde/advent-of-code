@@ -1,10 +1,12 @@
-import utils.readInput
+package aoc.years.y2024
+
+import aoc.common.Day
+import aoc.common.printResults
 import utils.sign
-import utils.testAndPrint
 import kotlin.math.abs
 
-fun main() {
-    fun part1(input: List<String>): Long {
+class Day21 : Day(2024, 21, 126384L to 154115708116294L) {
+    override fun part1(input: List<String>): Long {
         movementCache.clear()
         return input.filter { it.isNotBlank() }
             .sumOf {
@@ -12,21 +14,17 @@ fun main() {
             }
     }
 
-    fun part2(input: List<String>): Long {
+    override fun part2(input: List<String>): Long {
         movementCache.clear()
         return input.filter { it.isNotBlank() }
             .sumOf {
                 it.extractNumber() * inputOperations(it, 25)
             }
     }
+}
 
-    val testInput = readInput("Day21_test")
-    part1(testInput).testAndPrint(126384L)
-    part2(testInput).testAndPrint()
-
-    val input = readInput("Day21")
-    part1(input).testAndPrint()
-    part2(input).testAndPrint()
+fun main() {
+    Day21().execute().printResults()
 }
 
 private fun String.extractNumber(): Long = this.replace("[A-Z]".toRegex(), "").toLong(10)

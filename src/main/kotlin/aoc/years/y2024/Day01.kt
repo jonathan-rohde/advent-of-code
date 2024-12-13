@@ -1,10 +1,11 @@
-import utils.println
-import utils.readInput
+package aoc.years.y2024
+
+import aoc.common.Day
+import aoc.common.printResults
 import utils.toIntList
 import kotlin.math.abs
 
-fun main() {
-
+class Day01 : Day(year = 2024, day = 1, test = 11 to 31) {
     fun parseLists(input: List<String>): Pair<List<Int>, List<Int>> {
         return input.map {
             val parts = it.toIntList()
@@ -14,7 +15,7 @@ fun main() {
             .unzip()
     }
 
-    fun part1(input: List<String>): Int {
+    override fun part1(input: List<String>): Int {
         val (first, second) = parseLists(input)
             .let {
                 it.first.sorted() to it.second.sorted()
@@ -23,7 +24,7 @@ fun main() {
             .sumOf { (a, b) -> abs(a - b) }
     }
 
-    fun part2(input: List<String>): Int {
+    override fun part2(input: List<String>): Int {
         val (first, second) = parseLists(input)
         return first.sumOf { left ->
             left * second.count { right ->
@@ -31,14 +32,9 @@ fun main() {
             }
         }
     }
+}
 
-    // Or read a large test input from the `src/Day01_test.txt` file:
-    val testInput = readInput("Day01_test")
-    check(part1(testInput) == 11)
-    check(part2(testInput) == 31)
 
-    // Read the input from the `src/Day01.txt` file.
-    val input = readInput("Day01")
-    part1(input).println()
-    part2(input).println()
+fun main() {
+    Day01().execute().printResults()
 }

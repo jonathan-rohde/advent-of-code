@@ -1,32 +1,47 @@
-import utils.measured
-import utils.readInput
-import utils.testAndPrint
-import java.util.PriorityQueue
+package aoc.years.y2024
 
-fun main() {
-    fun part1(input: List<String>): Long {
+import aoc.common.Day
+import aoc.common.printResults
+import java.util.*
+import kotlin.collections.ArrayDeque
+import kotlin.collections.List
+import kotlin.collections.Set
+import kotlin.collections.any
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.component3
+import kotlin.collections.distinct
+import kotlin.collections.emptySet
+import kotlin.collections.filter
+import kotlin.collections.flatMap
+import kotlin.collections.forEach
+import kotlin.collections.isNotEmpty
+import kotlin.collections.joinToString
+import kotlin.collections.listOf
+import kotlin.collections.map
+import kotlin.collections.mapNotNull
+import kotlin.collections.mutableMapOf
+import kotlin.collections.mutableSetOf
+import kotlin.collections.set
+import kotlin.collections.sorted
+import kotlin.collections.toMutableSet
+
+class Day23 : Day(2024, 23, 7L to "co,de,ka,ta") {
+    override fun part1(input: List<String>): Long {
         neighbourCache.clear()
         connectionCheckCache.clear()
         return input.countPairsStartingWith("t")
     }
 
-    fun part2(input: List<String>): String {
+    override fun part2(input: List<String>): String {
         neighbourCache.clear()
         connectionCheckCache.clear()
         return input.largestSet().sorted().joinToString(",")
     }
+}
 
-    val testInput = readInput("Day23_test")
-    part1(testInput).testAndPrint(7L)
-    part2(testInput).testAndPrint("co,de,ka,ta")
-
-    val input = readInput("Day23")
-    measured(1) {
-        part1(input).testAndPrint()
-    }
-    measured(2) {
-        part2(input).testAndPrint()
-    }
+fun main() {
+    Day23().execute().printResults()
 }
 
 private fun List<String>.countPairsStartingWith(t: String): Long {

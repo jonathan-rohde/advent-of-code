@@ -1,44 +1,26 @@
-import utils.println
+package aoc.years.y2024
+
+import aoc.common.Day
+import aoc.common.printResults
 import utils.readInput
-import utils.testAndPrint
 import utils.toLongList
 import kotlin.time.measureTime
 
-fun main() {
-    fun part1(input: List<String>): Long {
+class Day11 : Day(2024, 11, 55312L to 65601038650482L) {
+    override fun part1(input: List<String>): Long {
         return input.first().toLongList()
             .sumOf { it.countSplitStone(25) }
 
     }
 
-    fun part2(input: List<String>): Long {
+    override fun part2(input: List<String>): Long {
         return input.first().toLongList()
             .sumOf { it.countSplitStone(75) }
     }
+}
 
-    val testInput = readInput("Day11_test")
-    measureTime {
-        part1(testInput)//.testAndPrint(55312L)
-    }.let {
-        println("Part 1 (Test): $it")
-    }
-    measureTime {
-        part2(testInput)//.testAndPrint()
-    }.let {
-        println("Part 2 (Test): $it")
-    }
-
-    val input = readInput("Day11")
-    measureTime {
-        part1(input)//.testAndPrint()
-    }.let {
-        println("Part 1: $it")
-    }
-    measureTime {
-        part2(input)//.testAndPrint()
-    }.let {
-        println("Part 2: $it")
-    }
+fun main() {
+    Day11().execute().printResults()
 }
 
 val cache = mutableMapOf<Pair<Long, Int>, Long>()

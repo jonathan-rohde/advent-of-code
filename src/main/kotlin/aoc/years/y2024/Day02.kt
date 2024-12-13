@@ -1,10 +1,12 @@
+package aoc.years.y2024
+
+import aoc.common.Day
+import aoc.common.printResults
 import utils.isSorted
-import utils.println
-import utils.readInput
 import utils.toIntList
 import kotlin.math.abs
 
-fun main() {
+class Day02 : Day(2024, 2, 2 to 4) {
     fun isSafe(input: List<Int>): Boolean {
         if (!input.isSorted()) return false
         val increment = input[0] < input[input.size - 1]
@@ -33,7 +35,7 @@ fun main() {
         return false
     }
 
-    fun part1(input: List<String>): Int {
+    override fun part1(input: List<String>): Int {
         return input
             .filter { it.isNotEmpty() }
             .map { it.toIntList() }
@@ -42,7 +44,7 @@ fun main() {
             }
     }
 
-    fun part2(input: List<String>): Int {
+    override fun part2(input: List<String>): Int {
         return input
             .filter { it.isNotEmpty() }
             .map { it.toIntList() }
@@ -50,14 +52,8 @@ fun main() {
                 isSafeTolerant(it)
             }
     }
+}
 
-    // Or read a large test input from the `src/DayXX_test.txt` file:
-    val testInput = readInput("Day02_test")
-    check(part1(testInput) == 2)
-    check(part2(testInput) == 4)
-
-    // Read the input from the `src/main/resources/DayXX.txt` file.
-    val input = readInput("Day02")
-    part1(input).println()
-    part2(input).println()
+fun main() {
+    Day02().execute().printResults()
 }

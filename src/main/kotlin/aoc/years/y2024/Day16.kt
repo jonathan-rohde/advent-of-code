@@ -1,35 +1,27 @@
-import utils.measured
-import utils.readInput
-import utils.testAndPrint
-import java.util.*
-import kotlin.math.abs
+package aoc.years.y2024
 
-fun main() {
-    fun part1(input: List<String>): Long {
+import aoc.common.Day
+import aoc.common.printResults
+import java.util.*
+
+class Day16 : Day(2024, 16, 11048L to 64L) {
+    override fun part1(input: List<String>): Long {
         val maze = input.parseMaze()
         maze.initGraph()
         val distances = maze.dijkstra()
         return distances[maze.end]!!.toLong()
     }
 
-    fun part2(input: List<String>): Long {
+    override fun part2(input: List<String>): Long {
         val maze = input.parseMaze()
         maze.initGraph()
         val seats = maze.countSeats()
         return seats.toLong()
     }
+}
 
-    val testInput = readInput("Day16_test")
-    part1(testInput).testAndPrint(11048L)
-    part2(testInput).testAndPrint(64L)
-
-    val input = readInput("Day16")
-    measured(1) {
-        part1(input).testAndPrint()
-    }
-    measured(2) {
-        part2(input).testAndPrint()
-    }
+fun main() {
+    Day16().execute().printResults()
 }
 
 private fun List<String>.parseMaze(): Maze {
@@ -69,7 +61,7 @@ private fun Maze.printMaze(distances: Map<Int, Int> = emptyMap(), seats: List<In
             print("E")
         } else {
             if (distances.contains(i)) {
-                print(distances[i]!!/ 10000)
+                print(distances[i]!! / 10000)
             } else if (seats.contains(i)) {
                 print("O")
             } else {
@@ -136,7 +128,7 @@ private fun Maze.countSeats(): Int {
 
     while (queue.isNotEmpty()) {
         var (pos, direction, score, visited) = queue.poll()
-        while(true) {
+        while (true) {
             visited += pos
             score += 1
             pos = direction.getNextPos(pos, width)
@@ -162,8 +154,8 @@ private fun Maze.countSeats(): Int {
         .count() + 1
 }
 
-private fun Direction.turnLeft() : Direction {
-    return when(this) {
+private fun Direction.turnLeft(): Direction {
+    return when (this) {
         Direction.NORTH -> Direction.WEST
         Direction.EAST -> Direction.NORTH
         Direction.SOUTH -> Direction.EAST
@@ -174,7 +166,7 @@ private fun Direction.turnLeft() : Direction {
 private fun Direction.turnRight() = turnLeft().turnLeft().turnLeft()
 
 private fun Direction.getNextPos(pos: Int, width: Int): Int {
-    return when(this) {
+    return when (this) {
         Direction.NORTH -> pos - width
         Direction.EAST -> pos + 1
         Direction.SOUTH -> pos + width

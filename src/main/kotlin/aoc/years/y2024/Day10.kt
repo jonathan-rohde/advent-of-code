@@ -1,8 +1,12 @@
+package aoc.years.y2024
+
+import aoc.common.Day
+import aoc.common.printResults
 import utils.readInput
 import utils.testAndPrint
 
-fun main() {
-    fun part1(input: List<String>): Long {
+class Day10 : Day(2024, 10, 36L to 81L) {
+    override fun part1(input: List<String>): Long {
         val map = input.toMap()
         val startingPositions = map.find(0)
         return map.evaluations(startingPositions)
@@ -10,19 +14,16 @@ fun main() {
 
     }
 
-    fun part2(input: List<String>): Long {
+    override fun part2(input: List<String>): Long {
         val map = input.toMap()
         val startingPositions = map.find(0)
         return map.evaluations2(startingPositions)
     }
+}
 
-    val testInput = readInput("Day10_test")
-    part1(testInput).testAndPrint(36L)
-    part2(testInput).testAndPrint(81L)
+fun main() {
+    Day10().execute().printResults()
 
-    val input = readInput("Day10")
-    part1(input).testAndPrint()
-    part2(input).testAndPrint()
 }
 
 private fun List<String>.toMap(): List<List<Int>> = map { it.map { c -> c.toString().toInt() }}

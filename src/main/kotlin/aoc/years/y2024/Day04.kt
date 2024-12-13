@@ -1,41 +1,33 @@
-import utils.println
-import utils.readInput
+package aoc.years.y2024
 
-fun main() {
-    fun part1(input: List<String>): Int {
+import aoc.common.Day
+import aoc.common.printResults
+
+class Day04 : Day(2024, 4, 18 to 9) {
+    override fun part1(input: List<String>): Int {
         val coords = input.findOccurrences('X')
-        val horizontal = coords.sumOf {
-            (row, col) ->
-                horizontalCheck(col, input[row])
+        val horizontal = coords.sumOf { (row, col) ->
+            horizontalCheck(col, input[row])
         }
-        val vertical = coords.sumOf {
-            (row, col) ->
-                verticalCheck(row, col, input)
+        val vertical = coords.sumOf { (row, col) ->
+            verticalCheck(row, col, input)
         }
-        val diagonal = coords.sumOf {
-            (row, col) ->
-                diagonalCheck(row, col, input)
+        val diagonal = coords.sumOf { (row, col) ->
+            diagonalCheck(row, col, input)
         }
         return horizontal + vertical + diagonal
     }
 
-    fun part2(input: List<String>): Int {
+    override fun part2(input: List<String>): Int {
         val coords = input.findOccurrences('A')
-        return coords.count {
-            (row, col) ->
-                isXmas(row, col, input)
+        return coords.count { (row, col) ->
+            isXmas(row, col, input)
         }
     }
+}
 
-    // Or read a large test input from the `src/DayXX_test.txt` file:
-    val testInput = readInput("Day04_test")
-    check(part1(testInput) == 18)
-    check(part2(testInput) == 9)
-
-    // Read the input from the `src/DayXX.txt` file.
-    val input = readInput("Day04")
-    part1(input).println()
-    part2(input).println()
+fun main() {
+    Day04().execute().printResults()
 }
 
 fun isXmas(row: Int, col: Int, input: List<String>): Boolean {
@@ -48,15 +40,14 @@ fun isXmas(row: Int, col: Int, input: List<String>): Boolean {
 }
 
 fun List<String>.findOccurrences(char: Char): List<Pair<Int, Int>> {
-    return this.flatMapIndexed {
-        row, line ->
-            line.mapIndexed { col, c ->
-                if (c == char) {
-                    row to col
-                } else {
-                    null
-                }
-            }.filterNotNull()
+    return this.flatMapIndexed { row, line ->
+        line.mapIndexed { col, c ->
+            if (c == char) {
+                row to col
+            } else {
+                null
+            }
+        }.filterNotNull()
     }
 }
 
@@ -105,7 +96,7 @@ fun diagonalCheck(row: Int, col: Int, input: List<String>): Int {
     if (row < input.size - 3 && col >= 3) {
         val word = input[row][col] + input[row + 1][col - 1] + input[row + 2][col - 2] + input[row + 3][col - 3]
         if (word == "XMAS") {
-           count++
+            count++
         }
     }
 

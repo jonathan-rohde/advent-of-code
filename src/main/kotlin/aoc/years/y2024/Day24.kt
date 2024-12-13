@@ -1,24 +1,23 @@
-import utils.readInput
-import utils.testAndPrint
+package aoc.years.y2024
 
-fun main() {
-    fun part1(input: List<String>): Long {
+import aoc.common.Day
+import aoc.common.printResults
+
+class Day24 : Day(2024, 24, 4L to null) {
+    override fun part1(input: List<String>): Long {
         val t = input.parseProblem()
         return t.solve()
     }
 
-    fun part2(input: List<String>): String {
+    override fun part2(input: List<String>): String {
         val system = input.parseProblem()
         val rules = system.second.toList()
         return rules.wrongWires().sorted().joinToString(",")
     }
+}
 
-    val testInput = readInput("Day24_test")
-    part1(testInput).testAndPrint(4L)
-
-    val input = readInput("Day24")
-    part1(input).testAndPrint()
-    part2(input).testAndPrint()
+fun main() {
+    Day24().execute().printResults()
 }
 
 private fun Pair<List<Gate>, List<Rule>>.solve(): Long {

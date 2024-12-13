@@ -1,25 +1,19 @@
-import utils.measured
-import utils.readInput
-import utils.testAndPrint
+package aoc.years.y2024
 
-fun main() {
-    fun part1(input: List<String>): Int =
+import aoc.common.Day
+import aoc.common.printResults
+
+class Day19 : Day(2024, 19, 6 to 16L) {
+    override fun part1(input: List<String>): Int =
         input.parseInput().calculateCombinations().count { (_, combinations) -> combinations > 0 }
 
-    fun part2(input: List<String>): Long =
+    override fun part2(input: List<String>): Long =
         input.parseInput().calculateCombinations().values.sum()
+}
 
-    val testInput = readInput("Day19_test")
-    part1(testInput).testAndPrint(6)
-    part2(testInput).testAndPrint(16L)
 
-    val input = readInput("Day19")
-    measured(1) {
-        part1(input).testAndPrint()
-    }
-    measured(2) {
-        part2(input).testAndPrint()
-    }
+fun main() {
+    Day19().execute().printResults()
 }
 
 private fun Onsen.combinationsOf(towel: Towel): Long {

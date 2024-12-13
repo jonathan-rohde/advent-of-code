@@ -1,32 +1,27 @@
-import utils.measured
-import utils.readInput
-import utils.testAndPrint
+package aoc.years.y2024
+
+import aoc.common.Day
+import aoc.common.printResults
 import kotlin.math.abs
 
-fun main() {
-    fun part1(input: List<String>, minSave: Int = 100): Long {
+class Day20 : Day(2024, 20, 5L to 285L) {
+    override fun part1(input: List<String>): Long {
+        val minSave = if (input.size > 100) 100 else 20
         val track = input.parseTrack()
         val cheats = track.findCheats()
         return cheats.filter { track.path.size - it >= minSave }.size.toLong()
     }
 
-    fun part2(input: List<String>, minSave: Int = 100): Long {
+    override fun part2(input: List<String>): Long {
+        val minSave = if (input.size > 100) 100 else 50
         val track = input.parseTrack()
         val cheats = track.findCheats(20)
         return cheats.filter { track.path.size - it >= minSave }.size.toLong()
     }
+}
 
-    val testInput = readInput("Day20_test")
-    part1(testInput, 20).testAndPrint(5L)
-    part2(testInput, 50).testAndPrint(285L)
-
-    val input = readInput("Day20")
-    measured(1) {
-        part1(input).testAndPrint()
-    }
-    measured(2) {
-        part2(input).testAndPrint()
-    }
+fun main() {
+    Day20().execute().printResults()
 }
 
 private fun List<String>.parseTrack(): RaceTrack {

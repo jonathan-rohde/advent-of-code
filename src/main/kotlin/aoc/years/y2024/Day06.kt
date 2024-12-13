@@ -1,14 +1,15 @@
-import utils.println
-import utils.readInput
-import kotlin.time.measureTimedValue
+package aoc.years.y2024
 
-fun main() {
-    fun part1(input: List<String>): Int {
+import aoc.common.Day
+import aoc.common.printResults
+
+class Day06 : Day(2024, 6, 41 to 6) {
+    override fun part1(input: List<String>): Int {
         val map = parseMap(input)
         return map.solve()
     }
 
-    fun part2(input: List<String>): Int {
+    override fun part2(input: List<String>): Int {
         val map = parseMap(input)
         val original = map.copy()
         map.solve()
@@ -20,8 +21,8 @@ fun main() {
         }.toList()
         possiblePlacements.parallelStream().forEach { (x, y) ->
             val replacement = original.copy()
-            if (replacement[y][x].state == TILE.EMPTY) {
-                replacement[y][x].state = TILE.OBSTACLE
+            if (replacement[y][x].state == GuardTile.EMPTY) {
+                replacement[y][x].state = GuardTile.OBSTACLE
                 val solution = replacement.solve()
                 if (solution == -1) {
                     possibleSolutions++
@@ -30,27 +31,31 @@ fun main() {
         }
         return possibleSolutions
     }
+}
 
-    val testInput = readInput("Day06_test")
-    val testOutput1 = part1(testInput)
-    val testOutput2 = part2(testInput)
-    testOutput1.println()
-    check(testOutput1 == 41)
-    measureTimedValue {
-        testOutput1.println()
-    }.println()
-    measureTimedValue {
-        testOutput2.println()
-    }.println()
+fun main() {
+    Day06().execute().printResults()
 
-    // Read the input from the `src/DayXX.txt` file.
-    val input = readInput("Day06")
-    measureTimedValue {
-        part1(input).println()
-    }.println()
-    measureTimedValue {
-        part2(input).println()
-    }.println()
+//    val testInput = readInput("Day06_test")
+//    val testOutput1 = part1(testInput)
+//    val testOutput2 = part2(testInput)
+//    testOutput1.println()
+//    check(testOutput1 == 41)
+//    measureTimedValue {
+//        testOutput1.println()
+//    }.println()
+//    measureTimedValue {
+//        testOutput2.println()
+//    }.println()
+//
+//    // Read the input from the `src/DayXX.txt` file.
+//    val input = readInput("Day06")
+//    measureTimedValue {
+//        part1(input).println()
+//    }.println()
+//    measureTimedValue {
+//        part2(input).println()
+//    }.println()
 }
 
 private fun List<MutableList<Point>>.copy(): List<MutableList<Point>> {
@@ -74,7 +79,7 @@ private fun parseMap(input: List<String>): List<MutableList<Point>> {
 private fun List<List<Point>>.findPlayer(): Pair<Int, Int> {
     for (y in this.indices) {
         for (x in this[y].indices) {
-            if (this[y][x].state == TILE.PLAYER) {
+            if (this[y][x].state == GuardTile.PLAYER) {
                 return Pair(x, y)
             }
         }
@@ -109,11 +114,11 @@ private fun List<MutableList<Point>>.solve(): Int {
         if (!validate(next.first, next.second, map)) {
             break
         }
-        if (map[next.second][next.first].state == TILE.OBSTACLE) {
+        if (map[next.second][next.first].state == GuardTile.OBSTACLE) {
             direction = direction.turn()
         } else {
             visited++
-            map[y][x].state = TILE.VISITED
+            map[y][x].state = GuardTile.VISITED
             x = next.first
             y = next.second
         }
@@ -123,10 +128,7 @@ private fun List<MutableList<Point>>.solve(): Int {
 }
 
 private fun validate(x: Int, y: Int, map: List<List<Point>>): Boolean {
-    if (y !in map.indices || x !in map[y].indices) {
-        return false
-    }
-    return true
+    return !(y !in map.indices || x !in map[y].indices)
 }
 
 enum class Direction {
@@ -151,31 +153,31 @@ enum class Direction {
 }
 
 data class Point(
-    var state: TILE,
+    var state: GuardTile,
     var direction: Direction? = null,
     var visitedDirections: MutableList<Direction> = mutableListOf(),
     var breaker: Boolean = false
 ) {
     companion object {
         fun fromChar(char: Char): Point = when (char) {
-            '.' -> Point(TILE.EMPTY)
-            '#' -> Point(TILE.OBSTACLE)
-            '<', '^', '>', 'v' -> Point(TILE.PLAYER, Direction.fromChar(char))
+            '.' -> Point(GuardTile.EMPTY)
+            '#' -> Point(GuardTile.OBSTACLE)
+            '<', '^', '>', 'v' -> Point(GuardTile.PLAYER, Direction.fromChar(char))
             else -> throw IllegalArgumentException("Unknown tile: $char")
         }
     }
 
     override fun toString(): String {
         return when (state) {
-            TILE.EMPTY -> "."
-            TILE.OBSTACLE -> "#"
-            TILE.VISITED -> "X"
-            TILE.PLAYER -> direction.toString()
+            GuardTile.EMPTY -> "."
+            GuardTile.OBSTACLE -> "#"
+            GuardTile.VISITED -> "X"
+            GuardTile.PLAYER -> direction.toString()
         }
     }
 }
 
-enum class TILE {
+enum class GuardTile {
     EMPTY,
     OBSTACLE,
     VISITED,

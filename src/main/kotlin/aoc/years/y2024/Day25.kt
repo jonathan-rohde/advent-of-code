@@ -1,9 +1,10 @@
-import utils.readInput
-import utils.testAndPrint
-import utils.toIntList
+package aoc.years.y2024
 
-fun main() {
-    fun part1(input: List<String>): Long {
+import aoc.common.Day
+import aoc.common.printResults
+
+class Day25 : Day(2024, 25, 3L to null) {
+    override fun part1(input: List<String>): Long {
         val keyAndLocks = input.parse()
         val keys = keyAndLocks.filter { !it.second }.map { it.first }
         val locks = keyAndLocks.filter { it.second }.map { it.first }
@@ -20,11 +21,13 @@ fun main() {
         return result
     }
 
-    val testInput = readInput("Day25_test")
-    part1(testInput).testAndPrint(3L)
+    override fun part2(input: List<String>): String {
+        return "Merry Christmas!"
+    }
+}
 
-    val input = readInput("Day25")
-    part1(input).testAndPrint()
+fun main() {
+    Day25().execute().printResults()
 }
 
 private fun List<String>.parse(): List<Pair<List<Int>, Boolean>> {

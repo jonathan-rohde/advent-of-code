@@ -1,10 +1,11 @@
-import utils.measured
-import utils.println
-import utils.readInput
-import utils.testAndPrint
+package aoc.years.y2024
 
-fun main() {
-    fun part1(input: List<String>, width: Int, height: Int): Long {
+import aoc.common.Day
+import aoc.common.printResults
+
+class Day14 : Day(2024, 14, 12L to null) {
+    override fun part1(input: List<String>): Long {
+        val (width, height) = if (input.size == 12) 7 to 11 else 101 to 103
         val robots = robotSteps(input, 100, width, height)
             .groupBy {
                 it.quadrant(width, height)
@@ -17,13 +18,14 @@ fun main() {
 
     }
 
-    fun part2(input: List<String>, width: Int, height: Int): Long {
+    override fun part2(input: List<String>): Long {
+        val (width, height) = if (input.size == 12) 7 to 11 else 101 to 103
         return (1..width * height).reversed()
             .asSequence()
             .map {
                 val robots = robotSteps(input, it, width, height).toSet()
                 if (robots.containsChristmasTree()) {
-                    robots.printMap(width, height)
+//                    robots.printMap(width, height)
                     it
                 } else {
                     -1
@@ -32,14 +34,10 @@ fun main() {
             .filter { it != -1 }
             .firstOrNull()?.toLong() ?: -1
     }
+}
 
-    val testInput = readInput("Day14_test")
-    part1(testInput, 11, 7).testAndPrint(12L)
-    part2(testInput, 11, 7).testAndPrint()
-
-    val input = readInput("Day14")
-    part1(input, 101, 103).testAndPrint()
-    measured(2) { part2(input, 101, 103).testAndPrint() }.println()
+fun main() {
+    Day14().execute().printResults()
 }
 
 private fun Collection<Pair<Int, Int>>.printMap(width: Int, height: Int) {
@@ -50,7 +48,7 @@ private fun Collection<Pair<Int, Int>>.printMap(width: Int, height: Int) {
                 else print(".")
             }
         }
-        kotlin.io.println()
+        println()
     }
 }
 

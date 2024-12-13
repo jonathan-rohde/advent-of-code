@@ -1,11 +1,13 @@
-import utils.measured
-import utils.readInput
-import utils.testAndPrint
+package aoc.years.y2024
+
+import aoc.common.Day
+import aoc.common.printResults
 import utils.toIntList
 import java.util.*
 
-fun main() {
-    fun part1(input: List<String>, dimensions: Int, amount: Int): Long {
+class Day18 : Day(2024, 18, 22L to (6 to 1)) {
+    override fun part1(input: List<String>): Long {
+        val (dimensions, amount) = if (input.size > 100) 71 to 1024 else 7 to 12
         val flakes = input.parseInput(amount)
         val distances = flakes.dijkstra(dimensions)
 //        printFlakes(flakes, dimensions)
@@ -13,29 +15,22 @@ fun main() {
         return distances[SnowFlake(dimensions - 1, dimensions - 1)]!!.toLong()
     }
 
-    fun part2(input: List<String>, dimension: Int, amount: Int): SnowFlake {
+    override fun part2(input: List<String>): SnowFlake {
+        val (dimensions, amount) = if (input.size > 100) 71 to 1024 else 7 to 12
         val flakes = input.parseInput(input.size)
-        for (i in amount .. (dimension * dimension)) {
-            val distances = flakes.take(i).toSet().dijkstra(dimension)
-            if (SnowFlake(dimension - 1, dimension - 1) !in distances) {
+        for (i in amount .. (dimensions * dimensions)) {
+            val distances = flakes.take(i).toSet().dijkstra(dimensions)
+            if (SnowFlake(dimensions - 1, dimensions - 1) !in distances) {
                 return flakes.toList()[i - 1]
             }
         }
         return SnowFlake(0, 0)
 
     }
+}
 
-    val testInput = readInput("Day18_test")
-    part1(testInput, 7, 12).testAndPrint(22L)
-    part2(testInput, 7, 12).testAndPrint(6 to 1)
-
-    val input = readInput("Day18")
-    measured(1) {
-        part1(input, 71, 1024).testAndPrint()
-    }
-    measured(2) {
-        part2(input, 71, 1024).testAndPrint()
-    }
+fun main() {
+    Day18().execute().printResults()
 }
 
 private fun List<String>.parseInput(amount: Int): Set<SnowFlake> {
