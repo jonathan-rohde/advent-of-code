@@ -18,9 +18,9 @@ fun main() {
             val middle = width / 2
             val topMiddle = Pair(middle, 0)
             if (robots.containsChristmasTree(width, height)) {
-            println("#### $it ####")
-            robots.printMap(width, height)
-//                return@forEach
+                println("#### $it ####")
+//                robots.printMap(width, height)
+                return it.toLong()
             }
         }
         return -1
@@ -53,14 +53,25 @@ private fun Set<Pair<Int, Int>>.printMap(width: Int, height: Int) {
 private fun Set<Pair<Int, Int>>.containsChristmasTree(width: Int, height: Int): Boolean {
     forEach { (x, y) ->
         if (
-            contains(Pair(x, y))
-            && contains(Pair(x + 1, y))
-            && contains(Pair(x + 1, y - 1))
-            && contains(Pair(x + 2, y))
-            && contains(Pair(x + 2, y - 2))
-            && contains(Pair(x + 3, y))
-            && contains(Pair(x + 3, y - 3))
+            (contains(Pair(x, y))
+                    && contains(Pair(x + 1, y))
+                    && contains(Pair(x + 1, y - 1))
+                    && contains(Pair(x + 2, y))
+                    && contains(Pair(x + 2, y - 2))
+                    && contains(Pair(x + 3, y))
+                    && contains(Pair(x + 3, y - 3)))
 
+            && (
+                    contains(Pair(x, y))
+                            && contains(Pair(x - 1, y))
+                            && contains(Pair(x - 1, y - 1))
+                            && contains(Pair(x, y - 1))
+                            && contains(Pair(x + 1, y - 1))
+                            && contains(Pair(x + 1, y))
+                            && contains(Pair(x + 1, y + 1))
+                            && contains(Pair(x, y + 1))
+                            && contains(Pair(x - 1, y + 1))
+                    )
         ) {
             return true
         }
