@@ -1,6 +1,5 @@
 import utils.readInput
 import utils.testAndPrint
-import kotlin.math.abs
 
 fun main() {
     fun part1(input: List<String>, width: Int, height: Int): Long {
@@ -13,13 +12,10 @@ fun main() {
     }
 
     fun part2(input: List<String>, width: Int, height: Int): Long {
-        (1..width * height).forEach {
+        (1..width * height).reversed().forEach {
             val robots = robotSteps(input, it, width, height).values.flatten().toSet()
-            val middle = width / 2
-            val topMiddle = Pair(middle, 0)
-            if (robots.containsChristmasTree(width, height)) {
-                println("#### $it ####")
-//                robots.printMap(width, height)
+            if (robots.containsChristmasTree()) {
+                robots.printMap(width, height)
                 return it.toLong()
             }
         }
@@ -31,26 +27,23 @@ fun main() {
     part2(testInput, 11, 7).testAndPrint()
 
     val input = readInput("Day14")
-//    part1(input, 101, 103).testAndPrint()
+    part1(input, 101, 103).testAndPrint()
     part2(input, 101, 103).testAndPrint()
 }
 
 private fun Set<Pair<Int, Int>>.printMap(width: Int, height: Int) {
     for (x in 0..width) {
         for (y in 0..height) {
-            if (contains(Pair(x, y))) {
-                print("#")
-            } else {
-                print(".")
+            count { it == Pair(x, y) }.let {
+                if (it > 0) print(it)
+                else print(".")
             }
         }
-        kotlin.io.println()
+        println()
     }
-    kotlin.io.println()
-    kotlin.io.println()
 }
 
-private fun Set<Pair<Int, Int>>.containsChristmasTree(width: Int, height: Int): Boolean {
+private fun Set<Pair<Int, Int>>.containsChristmasTree(): Boolean {
     forEach { (x, y) ->
         if (
             (contains(Pair(x, y))
@@ -107,14 +100,7 @@ private fun String.parseRobot(): Robot {
     )
 }
 
-private fun Int.bounded(len: Int): Int {
-    return (len + (this % len)) % len
-//    return if (this < 0) {
-//        len + (this % len)
-//    } else {
-//        this % len
-//    }
-}
+private fun Int.bounded(len: Int): Int = (len + (this % len)) % len
 
 private fun Pair<Int, Int>.quadrant(width: Int, height: Int): Int? {
     val (x, y) = this
