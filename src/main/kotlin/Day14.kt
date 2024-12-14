@@ -1,3 +1,5 @@
+import utils.measured
+import utils.println
 import utils.readInput
 import utils.testAndPrint
 
@@ -12,14 +14,19 @@ fun main() {
     }
 
     fun part2(input: List<String>, width: Int, height: Int): Long {
-        (1..width * height).reversed().forEach {
-            val robots = robotSteps(input, it, width, height).values.flatten().toSet()
-            if (robots.containsChristmasTree()) {
-                robots.printMap(width, height)
-                return it.toLong()
+        return (1..width * height).reversed()
+            .toList().parallelStream()
+            .map {
+                val robots = robotSteps(input, it, width, height).values.flatten().toSet()
+                if (robots.containsChristmasTree()) {
+                    robots.printMap(width, height)
+                    it
+                } else {
+                    -1
+                }
             }
-        }
-        return -1
+            .filter { it != -1 }
+            .findFirst().orElse(-1).toLong()
     }
 
     val testInput = readInput("Day14_test")
@@ -28,48 +35,38 @@ fun main() {
 
     val input = readInput("Day14")
     part1(input, 101, 103).testAndPrint()
-    part2(input, 101, 103).testAndPrint()
+    measured { part2(input, 101, 103).testAndPrint() }.println()
 }
 
-private fun Set<Pair<Int, Int>>.printMap(width: Int, height: Int) {
-    for (x in 0..width) {
-        for (y in 0..height) {
+private fun Collection<Pair<Int, Int>>.printMap(width: Int, height: Int) {
+    for (y in 0 until height) {
+        for (x in 0 until width) {
             count { it == Pair(x, y) }.let {
                 if (it > 0) print(it)
                 else print(".")
             }
         }
-        println()
+        kotlin.io.println()
     }
 }
 
 private fun Set<Pair<Int, Int>>.containsChristmasTree(): Boolean {
-    forEach { (x, y) ->
-        if (
-            (contains(Pair(x, y))
-                    && contains(Pair(x + 1, y))
-                    && contains(Pair(x + 1, y - 1))
-                    && contains(Pair(x + 2, y))
-                    && contains(Pair(x + 2, y - 2))
-                    && contains(Pair(x + 3, y))
-                    && contains(Pair(x + 3, y - 3)))
-
-            && (
-                    contains(Pair(x, y))
-                            && contains(Pair(x - 1, y))
-                            && contains(Pair(x - 1, y - 1))
-                            && contains(Pair(x, y - 1))
-                            && contains(Pair(x + 1, y - 1))
-                            && contains(Pair(x + 1, y))
-                            && contains(Pair(x + 1, y + 1))
-                            && contains(Pair(x, y + 1))
-                            && contains(Pair(x - 1, y + 1))
-                    )
-        ) {
-            return true
+    val line = groupBy { it.second }
+        .filter { it.value.size > 25 }
+        .values.firstOrNull()?.sortedBy { it.first }
+    if (line == null) return false
+    var streak = 0
+    val streaks = mutableListOf<Int>()
+    line.drop(1).forEachIndexed { index, pair ->
+        if (line[index].first == pair.first - 1) {
+            streak++
+        } else {
+            streaks.add(streak)
+            streak = 0
         }
     }
-    return false
+    streaks.add(streak)
+    return streaks.any { it > 15 }
 }
 
 private fun robotSteps(input: List<String>, steps: Int, width: Int, height: Int): Map<Int?, List<Pair<Int, Int>>> =
