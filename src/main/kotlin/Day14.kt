@@ -6,6 +6,10 @@ import utils.testAndPrint
 fun main() {
     fun part1(input: List<String>, width: Int, height: Int): Long {
         val robots = robotSteps(input, 100, width, height)
+            .groupBy {
+                it.quadrant(width, height)
+            }
+            .filterKeys { it != null }
 
         return robots.mapValues { it.value.count() }
             .values
@@ -15,9 +19,9 @@ fun main() {
 
     fun part2(input: List<String>, width: Int, height: Int): Long {
         return (1..width * height).reversed()
-            .toList().parallelStream()
+            .asSequence()
             .map {
-                val robots = robotSteps(input, it, width, height).values.flatten().toSet()
+                val robots = robotSteps(input, it, width, height).toSet()
                 if (robots.containsChristmasTree()) {
                     robots.printMap(width, height)
                     it
@@ -26,7 +30,7 @@ fun main() {
                 }
             }
             .filter { it != -1 }
-            .findFirst().orElse(-1).toLong()
+            .firstOrNull()?.toLong() ?: -1
     }
 
     val testInput = readInput("Day14_test")
@@ -56,20 +60,18 @@ private fun Set<Pair<Int, Int>>.containsChristmasTree(): Boolean {
         .values.firstOrNull()?.sortedBy { it.first }
     if (line == null) return false
     var streak = 0
-    val streaks = mutableListOf<Int>()
-    line.drop(1).forEachIndexed { index, pair ->
+    line.drop(1).asSequence().forEachIndexed { index, pair ->
         if (line[index].first == pair.first - 1) {
             streak++
         } else {
-            streaks.add(streak)
             streak = 0
         }
+        if (streak > 15) return true
     }
-    streaks.add(streak)
-    return streaks.any { it > 15 }
+    return false
 }
 
-private fun robotSteps(input: List<String>, steps: Int, width: Int, height: Int): Map<Int?, List<Pair<Int, Int>>> =
+private fun robotSteps(input: List<String>, steps: Int, width: Int, height: Int): Sequence<Pair<Int, Int>> =
     input
         .asSequence()
         .filter { it.isNotBlank() }
@@ -82,10 +84,6 @@ private fun robotSteps(input: List<String>, steps: Int, width: Int, height: Int)
         .map { (x, y) ->
             Pair(x.bounded(width), y.bounded(height))
         }
-        .groupBy {
-            it.quadrant(width, height)
-        }
-        .filterKeys { it != null }
 
 private fun String.parseRobot(): Robot {
     val match = "p=(-?[0-9]+),(-?[0-9]+) v=(-?[0-9]+),(-?[0-9]+)".toRegex().find(this) ?: error("Invalid robot")
