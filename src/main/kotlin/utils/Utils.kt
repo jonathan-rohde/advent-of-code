@@ -37,7 +37,9 @@ fun Any?.testAndPrint(checkValue: Any? = null) {
     }
 }
 
-fun measured(block: () -> Any?) = println("Duration: ${measureTime { block() }}")
+fun measured(task: Int, block: () -> Any?) {
+    println("Task $task Duration: ${measureTime { block() }}")
+}
 
 /**
  * Parse string into list of integers

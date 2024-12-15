@@ -39,7 +39,7 @@ fun main() {
 
     val input = readInput("Day14")
     part1(input, 101, 103).testAndPrint()
-    measured { part2(input, 101, 103).testAndPrint() }.println()
+    measured(2) { part2(input, 101, 103).testAndPrint() }.println()
 }
 
 private fun Collection<Pair<Int, Int>>.printMap(width: Int, height: Int) {

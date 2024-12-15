@@ -1,5 +1,7 @@
+import utils.measured
 import utils.readInput
 import utils.testAndPrint
+import java.util.Comparator
 
 fun main() {
     fun part1(input: List<String>): Long {
@@ -22,8 +24,8 @@ fun main() {
     part2(testInput).testAndPrint(9021L)
 
     val input = readInput("Day15")
-    part1(input).testAndPrint()
-    part2(input).testAndPrint()
+    measured(1) {  part1(input).testAndPrint() }
+    measured(2) { part2(input).testAndPrint() }
 }
 
 private fun List<String>.parseMap(): Game {
