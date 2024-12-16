@@ -16,14 +16,12 @@ fun main() {
         val maze = input.parseMaze()
         maze.initGraph()
         val distances = maze.dijkstra()
-//        maze.printMaze(distances=distances)
         val seats = maze.countSeats(maze.end, distances).distinct()
-        maze.printMaze(seats=seats)
+        maze.printMaze(seats = seats)
         return seats.size.toLong()
-//        return distances.size.toLong()
     }
 
-    val testInput = readInput("Day16_test2")
+    val testInput = readInput("Day16_test")
     part1(testInput).testAndPrint()
     part2(testInput).testAndPrint()
 
@@ -141,46 +139,28 @@ private fun Maze.dijkstra(): Map<Int, Int> {
     return distances
 }
 
-private fun Maze.countSeats(cur: Int, distances: Map<Int, Int>): List<Int> {
-    if (cur == end) {
-        return listOf(end)
+private fun Maze.countSeats(cur: Int, distances: Map<Int, Int>, visited: Set<Int> = emptySet()): List<Int> {
+
+//    return emptyList()
+    if (cur == start) {
+        return listOf(start)
     }
 
-    val queue = mutableListOf<Int>()
-    queue.add(jumper)
-    while(queue.isNotEmpty()) {
-        val next = queue.removeFirst()
-        val adjacents = listOf(
-            next - width,
-            next + width,
-            next - 1,
-            next + 1
-        ).filter { it in cells.indices && cells[it] }
-            .map { Pair(it, distances.getValue(it)) }
+    val adjacents = listOf(
+        cur - width,
+        cur + width,
+        cur - 1,
+        cur + 1
+    ).filter { it in cells.indices && cells[it] }
+        .map { Pair(it, distances.getValue(it)) }
+    val min = adjacents.minOfOrNull { it.second }!!
+    val alternativeMin = if (adjacents.size > 2) min + 1000 else min
+    val possible = adjacents.filter { it.second == min || it.second == alternativeMin }
 
-        val min = adjacents.minOfOrNull { it.second }
-        val possible = adjacents.filter { it.second == min }
-
-
-    }
-
-//    if (cur == start) {
-//        return listOf(start)
-//    }
-//
-//    val adjacents = listOf(
-//        cur - width,
-//        cur + width,
-//        cur - 1,
-//        cur + 1
-//    ).filter { it in cells.indices && cells[it] }
-//        .map { Pair(it, distances.getValue(it)) }
-//    val min = adjacents.minOfOrNull { it.second }
-//    val possible = adjacents.filter { it.second == min }
-//
-//    val predecessors = possible.map { it.first }
-//        .flatMap { countSeats(it, distances) }
-//    return predecessors + cur
+    val predecessors = possible.map { it.first }
+        .filter { !visited.contains(it) }
+        .flatMap { countSeats(it, distances, visited + cur) }
+    return predecessors + cur
 
 //    if (visited.contains(cur)) {
 //        return 0
