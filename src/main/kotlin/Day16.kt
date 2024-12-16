@@ -2,29 +2,38 @@ import utils.measured
 import utils.readInput
 import utils.testAndPrint
 import java.util.*
+import kotlin.math.abs
 
 fun main() {
     fun part1(input: List<String>): Long {
         val maze = input.parseMaze()
-//        maze.printMaze()
         maze.initGraph()
-        return maze.dijkstra()?.toLong() ?: -1
-//        return maze.shortestPath(Direction.EAST)
+        val distances = maze.dijkstra()
+        return distances[maze.end]!!.toLong()
     }
 
     fun part2(input: List<String>): Long {
-        return input.size.toLong()
+        val maze = input.parseMaze()
+        maze.initGraph()
+        val distances = maze.dijkstra()
+//        maze.printMaze(distances=distances)
+        val seats = maze.countSeats(maze.end, distances).distinct()
+        maze.printMaze(seats=seats)
+        return seats.size.toLong()
+//        return distances.size.toLong()
     }
 
-    val testInput = readInput("Day16_test")
-    part1(testInput).testAndPrint(7036L)
-//    part2(testInput).testAndPrint()
+    val testInput = readInput("Day16_test2")
+    part1(testInput).testAndPrint()
+    part2(testInput).testAndPrint()
 
     val input = readInput("Day16")
     measured(1) {
         part1(input).testAndPrint()
     }
-//    part2(input).testAndPrint()
+    measured(2) {
+//        part2(input).testAndPrint()
+    }
 }
 
 private fun List<String>.parseMaze(): Maze {
@@ -56,14 +65,20 @@ private fun List<String>.parseMaze(): Maze {
     return Maze(cells.flatten(), start, end, width, height, mutableMapOf())
 }
 
-private fun Maze.printMaze() {
+private fun Maze.printMaze(distances: Map<Int, Int> = emptyMap(), seats: List<Int> = emptyList()) {
     cells.forEachIndexed { i, entry ->
         if (i == start) {
             print("S")
         } else if (i == end) {
             print("E")
         } else {
-            print(if (entry) "." else "#")
+            if (distances.contains(i)) {
+                print(distances[i]!!/ 10000)
+            } else if (seats.contains(i)) {
+                print("O")
+            } else {
+                print(if (entry) "." else "#")
+            }
         }
         if (i % width == width - 1) {
             println()
@@ -92,7 +107,7 @@ private fun Maze.initGraph() {
     }
 }
 
-private fun Maze.dijkstra(): Int? {
+private fun Maze.dijkstra(): Map<Int, Int> {
     val distances = mutableMapOf<Int, Int>().withDefault { Int.MAX_VALUE }
     val priorityQueue = PriorityQueue<Triple<Int, Int, Direction>>(compareBy { it.second })
     val visited = mutableSetOf<Pair<Int, Int>>()
@@ -104,22 +119,89 @@ private fun Maze.dijkstra(): Int? {
         val (node, currentDist, direction) = priorityQueue.poll()
         if (visited.add(node to currentDist)) {
             listOf(
-                graphEast, graphWest, graphNorth, graphSouth
+                graphWest, graphNorth, graphEast, graphSouth
             ).forEach {graph ->
                 graph[node]?.forEach { adjacent ->
                     val dir = directionTo(node, adjacent)
                     val weight = if (dir == direction) 1 else 1001
                     val totalDist = currentDist + weight
-                    if (totalDist < distances.getValue(adjacent)) {
+                    if (totalDist <= distances.getValue(adjacent)) {
                         distances[adjacent] = totalDist
                         priorityQueue.add(Triple(adjacent, totalDist, dir))
+                    } else if (
+                        totalDist == distances.getValue(adjacent)
+                    ) {
+                        println("same $adjacent $totalDist")
                     }
                 }
             }
 
         }
     }
-    return distances[end]
+    return distances
+}
+
+private fun Maze.countSeats(cur: Int, distances: Map<Int, Int>): List<Int> {
+    if (cur == end) {
+        return listOf(end)
+    }
+
+    val queue = mutableListOf<Int>()
+    queue.add(jumper)
+    while(queue.isNotEmpty()) {
+        val next = queue.removeFirst()
+        val adjacents = listOf(
+            next - width,
+            next + width,
+            next - 1,
+            next + 1
+        ).filter { it in cells.indices && cells[it] }
+            .map { Pair(it, distances.getValue(it)) }
+
+        val min = adjacents.minOfOrNull { it.second }
+        val possible = adjacents.filter { it.second == min }
+
+
+    }
+
+//    if (cur == start) {
+//        return listOf(start)
+//    }
+//
+//    val adjacents = listOf(
+//        cur - width,
+//        cur + width,
+//        cur - 1,
+//        cur + 1
+//    ).filter { it in cells.indices && cells[it] }
+//        .map { Pair(it, distances.getValue(it)) }
+//    val min = adjacents.minOfOrNull { it.second }
+//    val possible = adjacents.filter { it.second == min }
+//
+//    val predecessors = possible.map { it.first }
+//        .flatMap { countSeats(it, distances) }
+//    return predecessors + cur
+
+//    if (visited.contains(cur)) {
+//        return 0
+//    }
+//    val adjacents = listOf(
+//        cur - width,
+//        cur + width,
+//        cur - 1,
+//        cur + 1
+//    ).filter { it in cells.indices && cells[it] }
+//        .map {
+//            val dir = directionTo(cur, it)
+//            val weight = if (dir == direction) 1 else 1001
+//        }
+//    val min = adjacents.minOfOrNull { distances.getValue(it) }
+//    if (min != null) {
+//        val possible = adjacents.filter { distances.getValue(it) == min }
+//        val rec = possible.sumOf { countSeats(it, distances, visited + cur) }
+//        return rec + cur
+//    }
+//    return 0
 }
 
 private fun Maze.directionTo(from: Int, to: Int): Direction {
@@ -145,7 +227,8 @@ private data class Maze(
     val graphWest: MutableMap<Int, List<Int>> = mutableMapOf(),
     val graphNorth: MutableMap<Int, List<Int>> = mutableMapOf(),
     val graphSouth: MutableMap<Int, List<Int>> = mutableMapOf()
-)
+) {
+}
 
 private data class MazeCoord(
     val x: Int,
