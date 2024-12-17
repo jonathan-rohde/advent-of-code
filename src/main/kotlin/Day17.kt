@@ -1,3 +1,4 @@
+import utils.measured
 import utils.readInput
 import utils.testAndPrint
 import utils.toLongList
@@ -10,45 +11,39 @@ fun main() {
         return computer.output.joinToString(",")
     }
 
-    fun part2Start(computer: Computer, start: Long): Long {
-        val testCount = start
-        var t = testCount
-        var alt = computer.resetAndChangeA(t)
-        alt.execute()
-        while (alt.output.size < computer.program.size) {
-            t *= 10
-            alt = computer.resetAndChangeA(t)
-            alt.execute()
-        }
-        return t + t/128
-    }
-
-    fun part2(input: List<String>, start: Long? = null): Long {
+    fun part2(input: List<String>): Long {
         val computer = input.parseComputer()
+        val ref = computer.program
 
-        val ref = computer.program.joinToString(",")
+        var goal: List<Long> = emptyList()
+        var valueForA = 0L
+        var targetLength = -1
 
-        val testCount = part2Start(computer, start ?: 256)
-        generateSequence(testCount) { it + 1 }
-            .forEach {
-                val alt = computer.resetAndChangeA(it)
+        do {
+            targetLength++
+            valueForA *= 8
+            goal = ref.subList(ref.lastIndex - targetLength, ref.size)
+            var test = emptyList<Long>()
+            while (goal != test) {
+                val alt = computer.resetAndChangeA(valueForA)
                 alt.execute()
-                val test = alt.output.joinToString(",")
-                println("$it: $test")
-                if (test == ref) {
-                    return it
+                test = alt.output
+                if (goal != test) {
+                    valueForA++
                 }
             }
-        return -1
+        } while(goal != ref)
+
+        return valueForA
     }
 
     val testInput = readInput("Day17_test")
     part1(testInput).testAndPrint("5,7,3,0")
-    part2(testInput, 1).testAndPrint(117440L)
+    part2(testInput).testAndPrint(117440L)
 
     val input = readInput("Day17")
-    part1(input).testAndPrint()
-    part2(input).testAndPrint()
+    measured(1) { part1(input).testAndPrint() }
+    measured(2) { part2(input).testAndPrint() }
 
 }
 
