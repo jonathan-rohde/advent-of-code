@@ -1,6 +1,6 @@
 import utils.readInput
 import utils.testAndPrint
-import utils.toIntList
+import utils.toLongList
 import kotlin.math.pow
 
 fun main() {
@@ -10,32 +10,46 @@ fun main() {
         return computer.output.joinToString(",")
     }
 
-    fun part2(input: List<String>): Long {
+    fun part2Start(computer: Computer, start: Long): Long {
+        val testCount = start
+        var t = testCount
+        var alt = computer.resetAndChangeA(t)
+        alt.execute()
+        while (alt.output.size < computer.program.size) {
+            t *= 10
+            alt = computer.resetAndChangeA(t)
+            alt.execute()
+        }
+        return t + t/128
+    }
+
+    fun part2(input: List<String>, start: Long? = null): Long {
         val computer = input.parseComputer()
-        val refA = computer.registry.first
 
         val ref = computer.program.joinToString(",")
 
-        var testCount = refA
-
-        do {
-            testCount++
-            val alt = computer.resetAndChangeA(testCount)
-            alt.execute()
-            val test = alt.output.joinToString(",")
-            println("$testCount: $test")
-        } while (test != ref)
-
-        return testCount.toLong()
+        val testCount = part2Start(computer, start ?: 256)
+        generateSequence(testCount) { it + 1 }
+            .forEach {
+                val alt = computer.resetAndChangeA(it)
+                alt.execute()
+                val test = alt.output.joinToString(",")
+                println("$it: $test")
+                if (test == ref) {
+                    return it
+                }
+            }
+        return -1
     }
 
     val testInput = readInput("Day17_test")
     part1(testInput).testAndPrint("5,7,3,0")
-    part2(testInput).testAndPrint(117440L)
+    part2(testInput, 1).testAndPrint(117440L)
 
     val input = readInput("Day17")
     part1(input).testAndPrint()
     part2(input).testAndPrint()
+
 }
 
 private fun List<String>.parseComputer(): Computer {
@@ -44,32 +58,39 @@ private fun List<String>.parseComputer(): Computer {
     return Computer(registry, program)
 }
 
-private fun List<String>.parseRegister(): Triple<Int, Int, Int> {
+private fun List<String>.parseRegister(): Triple<Long, Long, Long> {
     val a = this[0].parseRegister()
     val b = this[1].parseRegister()
     val c = this[2].parseRegister()
     return Triple(a, b, c)
 }
 
-private fun String.parseRegister(): Int {
+private fun String.parseRegister(): Long {
     val match = "Register [ABC]: ([0-9]+)".toRegex().find(this) ?: error("Invalid Registry")
-    return match.groupValues[1].toInt()
+    return match.groupValues[1].toLong()
 }
 
-private fun String.parseProgram(): List<Int> {
-    return substring("Program: ".length).toIntList()
+private fun String.parseProgram(): List<Long> {
+    return substring("Program: ".length).toLongList()
 }
 
-private fun Computer.execute() {
+private fun Computer.execute(expection: List<Long>? = null) {
     while (instructionPointer in program.indices) {
         val code = program[instructionPointer]
         val operand = program[instructionPointer + 1]
         val instruction = Instruction.fromCode(code)
         instruction.execute(this, operand)
+        if (instruction == Instruction.`out` && expection != null) {
+            for (i in output.indices) {
+                if (i in expection.indices && output[i] != expection[i]) {
+                    return
+                }
+            }
+        }
     }
 }
 
-private fun Computer.resetAndChangeA(a: Int): Computer {
+private fun Computer.resetAndChangeA(a: Long): Computer {
     return copy(
         registry = initRegistry.copy(first = a),
         instructionPointer = 0,
@@ -78,43 +99,43 @@ private fun Computer.resetAndChangeA(a: Int): Computer {
 }
 
 private data class Computer(
-    var registry: Triple<Int, Int, Int>,
-    val program: List<Int>,
+    var registry: Triple<Long, Long, Long>,
+    var program: List<Long>,
 
     var instructionPointer: Int = 0,
 
-    val output: MutableList<Int> = mutableListOf(),
-    var initRegistry: Triple<Int, Int, Int> = registry,
+    val output: MutableList<Long> = mutableListOf(),
+    var initRegistry: Triple<Long, Long, Long> = registry,
 ) {
     init {
         initRegistry = registry.copy()
     }
 }
 
-private fun Triple<Int, Int, Int>.valueOfOperand(operand: Int): Int {
+private fun Triple<Long, Long, Long>.valueOfOperand(operand: Long): Long {
     return when (operand) {
-        0, 1, 2, 3 -> operand
-        4 -> first
-        5 -> second
-        6 -> third
+        0L, 1L, 2L, 3L -> operand
+        4L -> first
+        5L -> second
+        6L -> third
         else -> error("Invalid operand")
     }
 }
 
 private enum class Instruction(
-    val code: Int
+    val code: Long
 ) {
     adv(0) {
-        override fun execute(computer: Computer, operand: Int) {
+        override fun execute(computer: Computer, operand: Long) {
             val numerator = computer.registry.first
             val denominator = 2.0.pow(computer.registry.valueOfOperand(operand).toDouble())
-            val result = (numerator / denominator).toInt()
+            val result = (numerator / denominator).toLong()
             computer.registry = computer.registry.copy(first = result)
             computer.instructionPointer += 2
         }
     },
     bxl(1) {
-        override fun execute(computer: Computer, operand: Int) {
+        override fun execute(computer: Computer, operand: Long) {
             val left = computer.registry.second
             val right = operand
             val result = left xor right
@@ -123,58 +144,58 @@ private enum class Instruction(
         }
     },
     bst(2) {
-        override fun execute(computer: Computer, operand: Int) {
+        override fun execute(computer: Computer, operand: Long) {
             val result = computer.registry.valueOfOperand(operand) % 8
             computer.registry = computer.registry.copy(second = result)
             computer.instructionPointer += 2
         }
     },
     jnz(3) {
-        override fun execute(computer: Computer, operand: Int) {
-            if (computer.registry.first != 0) {
-                computer.instructionPointer = operand
+        override fun execute(computer: Computer, operand: Long) {
+            if (computer.registry.first != 0L) {
+                computer.instructionPointer = operand.toInt()
             } else {
                 computer.instructionPointer += 2
             }
         }
     },
     bxc(4) {
-        override fun execute(computer: Computer, operand: Int) {
+        override fun execute(computer: Computer, operand: Long) {
             val result = computer.registry.second xor computer.registry.third
             computer.registry = computer.registry.copy(second = result)
             computer.instructionPointer += 2
         }
     },
     `out`(5) {
-        override fun execute(computer: Computer, operand: Int) {
+        override fun execute(computer: Computer, operand: Long) {
             val op = computer.registry.valueOfOperand(operand) % 8
             computer.output.add(op)
             computer.instructionPointer += 2
         }
     },
     bdv(6) {
-        override fun execute(computer: Computer, operand: Int) {
+        override fun execute(computer: Computer, operand: Long) {
             val numerator = computer.registry.first
             val denominator = 2.0.pow(computer.registry.valueOfOperand(operand).toDouble())
-            val result = (numerator / denominator).toInt()
+            val result = (numerator / denominator).toLong()
             computer.registry = computer.registry.copy(second = result)
             computer.instructionPointer += 2
         }
     },
     cdv(7) {
-        override fun execute(computer: Computer, operand: Int) {
+        override fun execute(computer: Computer, operand: Long) {
             val numerator = computer.registry.first
             val denominator = 2.0.pow(computer.registry.valueOfOperand(operand).toDouble())
-            val result = (numerator / denominator).toInt()
+            val result = (numerator / denominator).toLong()
             computer.registry = computer.registry.copy(third = result)
             computer.instructionPointer += 2
         }
     };
 
-    abstract fun execute(computer: Computer, operand: Int)
+    abstract fun execute(computer: Computer, operand: Long)
 
     companion object {
-        fun fromCode(code: Int): Instruction {
+        fun fromCode(code: Long): Instruction {
             return entries.first { it.code == code }
         }
     }
