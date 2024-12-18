@@ -1,3 +1,4 @@
+import utils.measured
 import utils.readInput
 import utils.testAndPrint
 import utils.toIntList
@@ -12,9 +13,9 @@ fun main() {
         return distances[SnowFlake(dimensions - 1, dimensions - 1)]!!.toLong()
     }
 
-    fun part2(input: List<String>, dimension: Int): SnowFlake {
+    fun part2(input: List<String>, dimension: Int, amount: Int): SnowFlake {
         val flakes = input.parseInput(input.size)
-        for (i in 0 .. (dimension * dimension)) {
+        for (i in amount .. (dimension * dimension)) {
             val distances = flakes.take(i).toSet().dijkstra(dimension)
             if (SnowFlake(dimension - 1, dimension - 1) !in distances) {
                 return flakes.toList()[i - 1]
@@ -26,11 +27,15 @@ fun main() {
 
     val testInput = readInput("Day19_test")
     part1(testInput, 7, 12).testAndPrint(22L)
-    part2(testInput, 7).testAndPrint(6 to 1)
+    part2(testInput, 7, 12).testAndPrint(6 to 1)
 
     val input = readInput("Day19")
-    part1(input, 71, 1024).testAndPrint()
-    part2(input, 71).testAndPrint()
+    measured(1) {
+        part1(input, 71, 1024).testAndPrint()
+    }
+    measured(2) {
+        part2(input, 71, 1024).testAndPrint()
+    }
 }
 
 private fun List<String>.parseInput(amount: Int): Set<SnowFlake> {
