@@ -25,11 +25,11 @@ fun main() {
 
     }
 
-    val testInput = readInput("Day19_test")
+    val testInput = readInput("Day18_test")
     part1(testInput, 7, 12).testAndPrint(22L)
     part2(testInput, 7, 12).testAndPrint(6 to 1)
 
-    val input = readInput("Day19")
+    val input = readInput("Day18")
     measured(1) {
         part1(input, 71, 1024).testAndPrint()
     }
