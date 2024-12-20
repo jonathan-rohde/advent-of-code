@@ -1,27 +1,32 @@
+import utils.measured
 import utils.readInput
 import utils.testAndPrint
 import kotlin.math.abs
 
 fun main() {
-    fun part1(input: List<String>): Long {
+    fun part1(input: List<String>, minSave: Int = 100): Long {
         val track = input.parseTrack()
         val cheats = track.findCheats()
-        return cheats.filter { track.path.size - it > 100 }.size.toLong()
+        return cheats.filter { track.path.size - it >= minSave }.size.toLong()
     }
 
-    fun part2(input: List<String>): Long {
+    fun part2(input: List<String>, minSave: Int = 100): Long {
         val track = input.parseTrack()
         val cheats = track.findCheats(20)
-        return cheats.filter { track.path.size - it >= 100 }.size.toLong()
+        return cheats.filter { track.path.size - it >= minSave }.size.toLong()
     }
 
     val testInput = readInput("Day20_test")
-    part1(testInput).testAndPrint()
-    part2(testInput).testAndPrint()
+    part1(testInput, 20).testAndPrint(5L)
+    part2(testInput, 50).testAndPrint(285L)
 
     val input = readInput("Day20")
-    part1(input).testAndPrint()
-    part2(input).testAndPrint()
+    measured(1) {
+        part1(input).testAndPrint()
+    }
+    measured(2) {
+        part2(input).testAndPrint()
+    }
 }
 
 private fun List<String>.parseTrack(): RaceTrack {
@@ -36,22 +41,19 @@ private fun List<String>.createPath(): List<Pair<Int, Int>> {
     val end = find("E")
 
     val path = mutableListOf(start)
-    var prev: Pair<Int, Int>? = null
     var current = start
     while (current != end) {
-        val next = next(current, prev)
-        path.add(next)
-        prev = current
-        current = next
+        current = next(current, path)
+        path.add(current)
     }
     return path
 }
 
-private fun List<String>.next(current: Pair<Int, Int>, prev: Pair<Int, Int>?): Pair<Int, Int> {
+private fun List<String>.next(current: Pair<Int, Int>, visited: List<Pair<Int, Int>>): Pair<Int, Int> {
     val (x, y) = current
     val directions = listOf(x to y - 1, x + 1 to y, x to y + 1, x - 1 to y)
     return directions
-        .filter { (x, y) -> x to y != prev }
+        .filter { (x, y) -> x to y !in visited }
         .filter { (x, y) -> y in indices && x in this[y].indices }
         .first { (x, y) -> this[y][x] == '.' || this[y][x] == 'E' }
 }
