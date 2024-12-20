@@ -11,8 +11,8 @@ fun main() {
 
     fun part2(input: List<String>): Long {
         val track = input.parseTrack()
-        val cheats = track.findCheats()
-        return cheats.filter { track.path.size - it > 100 }.size.toLong()
+        val cheats = track.findCheats(20)
+        return cheats.filter { track.path.size - it >= 100 }.size.toLong()
     }
 
     val testInput = readInput("Day20_test")
@@ -64,24 +64,28 @@ private fun List<String>.find(s: String): Pair<Int, Int> {
     error("No $s found")
 }
 
-private fun RaceTrack.findCheats(): List<Int> {
+private fun RaceTrack.findCheats(maxCheatSize: Int = 2): List<Int> {
     val cheats = mutableListOf<Int>()
     path.forEachIndexed { index, (x, y) ->
-        val cheatDestinations = findCheatDestinations(x, y)
+        val cheatDestinations = findCheatDestinations(index, x, y, maxCheatSize)
         cheatDestinations.forEach { to ->
-            val lengthShortcut = path.size - to + index
-            cheats.add(lengthShortcut)
+            val distanceCutted = to - index
+            val lengthShortcut = abs(x - path[to].first) + abs(y - path[to].second)
+            val trackLength = path.size - distanceCutted + lengthShortcut
+            cheats.add(trackLength)
         }
     }
     return cheats
 }
 
-private fun RaceTrack.findCheatDestinations(x: Int, y: Int): List<Int> {
+private fun RaceTrack.findCheatDestinations(start: Int, x: Int, y: Int, maxCheatSize: Int): List<Int> {
     val destinations = mutableListOf<Int>()
     path.forEachIndexed { index, (x2, y2) ->
-        val distance = abs(x - x2) + abs(y - y2)
-        if (distance <= 2) {
-            destinations.add(index)
+        if (index > start) {
+            val distance = abs(x - x2) + abs(y - y2)
+            if (distance <= maxCheatSize) {
+                destinations.add(index)
+            }
         }
     }
     return destinations
