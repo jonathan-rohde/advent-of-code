@@ -116,9 +116,7 @@ private fun tryInput(input: String): Long {
     }
 
     while (queue.isNotEmpty()) {
-        val data = queue.poll().also {
-            it.println()
-        }
+        val data = queue.poll()
         if (!visited.add(CheckData(
             cold = data.cold,
             radiation = data.radiation,
@@ -161,8 +159,7 @@ private fun tryInput(input: String): Long {
                         output = a,
                         length = data.length + 1,
                         movement = it,
-                        previous = if (data.movement == ArmMovement.PRESS) emptyList() else data.previous + data.movement,
-                        typed = data.typed + data.movement
+
                     )
                 )
             }
@@ -215,9 +212,7 @@ private fun pressureInput(
     output: String
 ): Pair<PressurePosition, String> {
     if (movement == ArmMovement.PRESS) {
-        return pressureArmLoc to output + keypad.get(pressureArmLoc).also {
-            println("Access $it")
-        }
+        return pressureArmLoc to output + keypad.get(pressureArmLoc)
     }
     return movement(movement, pressureArmLoc) to output
 }
@@ -292,9 +287,7 @@ private data class QueueData(
     val pressure: PressurePosition,
     val output: String,
     val length: Long,
-    val movement: ArmMovement,
-    val previous: List<ArmMovement> = emptyList(),
-    val typed: List<ArmMovement> = emptyList()
+    val movement: ArmMovement
 )
 
 private data class CheckData(
