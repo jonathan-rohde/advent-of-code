@@ -5,10 +5,14 @@ import java.util.PriorityQueue
 
 fun main() {
     fun part1(input: List<String>): Long {
+        neighbourCache.clear()
+        connectionCheckCache.clear()
         return input.countPairsStartingWith("t")
     }
 
     fun part2(input: List<String>): String {
+        neighbourCache.clear()
+        connectionCheckCache.clear()
         return input.largestSet().sorted().joinToString(",")
     }
 
@@ -26,30 +30,32 @@ fun main() {
 }
 
 private fun List<String>.countPairsStartingWith(t: String): Long {
-    val pairs = parse()
-    val network: MutableMap<String, List<String>> = mutableMapOf<String, List<String>>().withDefault { emptyList() }
-    pairs.forEach { (a, b) ->
-        network[a] = network.getValue(a) + b
-        network[b] = network.getValue(b) + a
-    }
-
     val result = mutableSetOf<Triple<String, String, String>>()
 
-    network.entries.forEach { (a, listA) ->
-        network.entries.forEach { (b, listB) ->
-            network.entries.forEach { (c, listC) ->
-                if (listA.contains(b) && listB.contains(c) && listC.contains(a)) {
-                    val (x, y, z) = listOf(a, b, c).sorted().distinct()
-                    result.add(Triple(x, y, z))
-                }
+    val pairs = parse()
+    val queue = ArrayDeque<Pair<String, String>>()
+    pairs.filter { it.first.startsWith(t) || it.second.startsWith(t) }
+        .forEach { queue.add(it) }
 
+    while (queue.isNotEmpty()) {
+        val node = queue.removeFirst()
+
+        val matchingPairs = pairs.filter { it != node }
+            .filter {
+                it.first == node.first || it.first == node.second ||
+                        it.second == node.first || it.second == node.second
+            }
+
+        val (a, b) = node
+        matchingPairs.forEach { (c, d) ->
+            val (x, y, z) = listOf(a, b, c, d).sorted().distinct()
+            if (pairs.hasConnection(x, y) && pairs.hasConnection(y, z) && pairs.hasConnection(z, x)) {
+                result.add(Triple(x, y, z))
             }
         }
     }
 
-    return result.count { (a, b, c) ->
-        listOf(a, b, c).any { it.startsWith(t) }
-    }.toLong()
+    return result.size.toLong()
 }
 
 private fun List<String>.largestSet(): Set<String> {
@@ -61,6 +67,26 @@ private fun List<String>.largestSet(): Set<String> {
 
     val connections = findConnections(pairs)
     return connections
+}
+
+private val neighbourCache = mutableMapOf<String, List<String>>()
+
+private fun List<Pair<String, String>>.getNeighbour(node: String): List<String> {
+    return neighbourCache[node] ?: mapNotNull { (a, b) ->
+        if (a == node) {
+            b
+        } else if (b == node) {
+            a
+        } else {
+            null
+        }
+    }
+        .filter {
+            // only if it has connection to all in group
+            hasConnection(node, it)
+        }.also {
+            neighbourCache[node] = it
+        }
 }
 
 private fun findConnections(pairs: List<Pair<String, String>>): Set<String> {
@@ -75,20 +101,7 @@ private fun findConnections(pairs: List<Pair<String, String>>): Set<String> {
         if (visited.contains(node)) continue
         visited.add(node)
         val neighbourQueue = PriorityQueue<String>()
-        pairs.mapNotNull { (a, b) ->
-            if (a == node) {
-                b
-            } else if (b == node) {
-                a
-            } else {
-                null
-            }
-        }
-            .filter {
-                // only if it has connection to all in group
-                pairs.hasConnection(node, it)
-            }
-            .forEach { neighbourQueue.add(it) }
+        pairs.getNeighbour(node).forEach { neighbourQueue.add(it) }
         val group = mutableSetOf(node)
         while (neighbourQueue.isNotEmpty()) {
             val neighbour = neighbourQueue.poll()
@@ -96,20 +109,7 @@ private fun findConnections(pairs: List<Pair<String, String>>): Set<String> {
             if (group.contains(neighbour)) continue
             visited.add(neighbour)
             group.add(neighbour)
-            pairs.mapNotNull { (a, b) ->
-                if (a == node) {
-                    b
-                } else if (b == node) {
-                    a
-                } else {
-                    null
-                }
-            }
-                .filter {
-                    // only if it has connection to all in group
-                    group.all { member -> pairs.hasConnection(member, it) }
-                }
-                .forEach { neighbourQueue.add(it) }
+            pairs.getNeighbour(neighbour).forEach { neighbourQueue.add(it) }
         }
         if (group.size > result.size) {
             result = group
@@ -118,12 +118,13 @@ private fun findConnections(pairs: List<Pair<String, String>>): Set<String> {
     return result
 }
 
-private fun List<Pair<String, String>>.hasConnection(a: String, b: String): Boolean {
-    return any { it.hasConnection(a, b) }
-}
+private val connectionCheckCache = mutableMapOf<Pair<String, String>, Boolean>()
 
-private fun Pair<String, String>.hasConnection(a: String, b: String): Boolean {
-    return this == a to b || this == b to a
+private fun List<Pair<String, String>>.hasConnection(a: String, b: String): Boolean {
+    return connectionCheckCache[a to b] ?:
+    (contains(a to b) || contains(b to a)).also {
+        connectionCheckCache[a to b] = it
+    }
 }
 
 private fun String.parse(): Pair<String, String> = split("-").let { it[0] to it[1] }
