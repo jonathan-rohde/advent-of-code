@@ -105,8 +105,8 @@ private fun findConnections(pairs: List<Pair<String, String>>): Set<String> {
         val group = mutableSetOf(node)
         while (neighbourQueue.isNotEmpty()) {
             val neighbour = neighbourQueue.poll()
-            if (!group.all { pairs.hasConnection(it, neighbour) }) continue
             if (group.contains(neighbour)) continue
+            if (group.any { !pairs.hasConnection(it, neighbour) }) continue
             visited.add(neighbour)
             group.add(neighbour)
             pairs.getNeighbour(neighbour).forEach { neighbourQueue.add(it) }
