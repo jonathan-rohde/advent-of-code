@@ -1,3 +1,4 @@
+import utils.measured
 import utils.readInput
 import utils.testAndPrint
 import java.util.PriorityQueue
@@ -16,8 +17,12 @@ fun main() {
     part2(testInput).testAndPrint("co,de,ka,ta")
 
     val input = readInput("Day23")
-    part1(input).testAndPrint()
-    part2(input).testAndPrint()
+    measured(1) {
+        part1(input).testAndPrint()
+    }
+    measured(2) {
+        part2(input).testAndPrint()
+    }
 }
 
 private fun List<String>.countPairsStartingWith(t: String): Long {
@@ -69,7 +74,6 @@ private fun findConnections(pairs: List<Pair<String, String>>): Set<String> {
         val node = queue.poll()
         if (visited.contains(node)) continue
         visited.add(node)
-        println("Check $node")
         val neighbourQueue = PriorityQueue<String>()
         pairs.mapNotNull { (a, b) ->
             if (a == node) {
