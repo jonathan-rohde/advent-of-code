@@ -95,7 +95,7 @@ private fun Rule.`xor only on intermediate gates `(): Boolean {
             b[0] !in listOf('x', 'y', 'z')
 }
 
-private fun Rule.`and not on x00 and output is not in a or`(rules: List<Rule>) : Set<String> {
+private fun Rule.`and but not on x00 and output is not in a or`(rules: List<Rule>) : Set<String> {
     val (a, op, b) = first
     if (op == "AND" && a != "x00" && b != "x00") {
         return rules.mapNotNull { (swapLeft, _) ->
@@ -138,7 +138,7 @@ private fun List<Rule>.wrongWires(): Set<String> {
             result.add(rule.second)
         }
 
-        result.addAll(rule.`and not on x00 and output is not in a or`(this))
+        result.addAll(rule.`and but not on x00 and output is not in a or`(this))
         result.addAll(rule.`xor should swap, if there is a or with remaining operators`(this))
 
     }
