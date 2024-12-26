@@ -1,22 +1,19 @@
 package template
 
-import utils.readInput
-import utils.testAndPrint
+import aoc.common.Day
+import aoc.common.printResults
+
+class DayXX : Day(year = 0, day = 0) {
+    override fun part1(input: List<String>): Any {
+        TODO("Not yet implemented")
+    }
+
+    override fun part2(input: List<String>): Any {
+        TODO("Not yet implemented")
+    }
+
+}
 
 fun main() {
-    fun part1(input: List<String>): Long {
-        return input.size.toLong()
-    }
-
-    fun part2(input: List<String>): Long {
-        return input.size.toLong()
-    }
-
-    val testInput = readInput("DayXX_test")
-    part1(testInput).testAndPrint(1)
-    part2(testInput).testAndPrint(1)
-
-    val input = readInput("DayXX")
-    part1(input).testAndPrint()
-    part2(input).testAndPrint()
+    DayXX().execute().printResults()
 }
