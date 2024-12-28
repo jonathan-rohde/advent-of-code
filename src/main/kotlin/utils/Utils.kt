@@ -55,5 +55,5 @@ fun String.toIntList(): List<Int> {
  */
 fun String.toLongList(): List<Long> {
     if (this.isEmpty()) return emptyList()
-    return this.split("\\s+|,".toRegex()).map { it.toLong() }
+    return this.split("\\s+|,".toRegex()).filter { it.isNotBlank() }.map { it.toLong() }
 }
