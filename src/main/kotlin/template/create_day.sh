@@ -22,6 +22,7 @@ cp DayTemplate.kt $directory/Day$dayLong.kt
 sed -i '' "s/DayXX/Day$dayLong/g" $directory/Day$dayLong.kt
 sed -i '' "s/year = 0/year = $year/g" $directory/Day$dayLong.kt
 sed -i '' "s/day = 0/day = $day/g" $directory/Day$dayLong.kt
+sed -i '' "s/package template/package aoc.years.y$year/g" $directory/Day$dayLong.kt
 git add $directory/Day$dayLong.kt
 
 touch $resourceDirectory/Day$dayLong.txt
