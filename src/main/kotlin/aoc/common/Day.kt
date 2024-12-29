@@ -10,17 +10,19 @@ import kotlin.time.measureTimedValue
 abstract class Day(
     val year: Int,
     val day: Int,
-    val test: Pair<Any?, Any?> = null to null
+    val test: Pair<Any?, Any?> = null to null,
+    val testFile1: String = "Day${day.toString().padStart(2, '0')}_test",
+    val testFile2: String = "Day${day.toString().padStart(2, '0')}_test"
 ) {
 
     fun execute(runs: Int = 1): Result {
         val dayString = day.toString().padStart(2, '0')
-        val testFileName = "Day${dayString}_test"
         val fileName = "Day$dayString"
-        val testInput = readInput(testFileName, year)
+        val testInput = readInput(testFile1, year)
+        val testInput2 = readInput(testFile2, year)
         val input = readInput(fileName, year)
 
-        val testResults = executePart1(testInput, test.first != null) to executePart2(testInput, test.second != null)
+        val testResults = executePart1(testInput, test.first != null) to executePart2(testInput2, test.second != null)
         val results = (0 until runs).map {
             val part1 = executePart1(input)
             val part2 = executePart2(input)
