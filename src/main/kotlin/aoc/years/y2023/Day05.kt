@@ -1,4 +1,4 @@
-package template
+package aoc.years.y2023
 
 import aoc.common.Day
 import aoc.common.printResults
