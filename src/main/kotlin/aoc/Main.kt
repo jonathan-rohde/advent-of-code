@@ -1,10 +1,11 @@
 package aoc
 
 import aoc.years.y2024.Year2024
+import aoc.years.y2025.Year2025
 import utils.toIntList
 
 fun main(args: Array<String>) {
-    var year = 2024
+    var year = 2025
     var days = emptyList<Int>()
     var opaqueResults = true
     var runs = 1
@@ -25,5 +26,6 @@ fun main(args: Array<String>) {
 
     when(year) {
         2024 -> Year2024().execute(days, opaqueResults, runs)
+        2025 -> Year2025().execute(days, opaqueResults, runs)
     }
 }
