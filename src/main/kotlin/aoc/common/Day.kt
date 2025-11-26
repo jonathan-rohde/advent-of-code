@@ -36,7 +36,7 @@ abstract class Day(
 
         if (test) {
             check(result.value == this.test.first) {
-                "${this.test.first} != $result"
+                "${this.test.first} != ${result.value}"
             }
         }
 

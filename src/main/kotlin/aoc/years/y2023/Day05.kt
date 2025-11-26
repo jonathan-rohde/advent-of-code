@@ -6,12 +6,14 @@ import utils.toLongList
 
 class Day05 : Day(year = 2023, day = 5, test = 35L to null) {
     override fun part1(input: List<String>): Any {
-        val seedMap = input.parse()
-        return smallestLocation(seedMap, seedMap.seeds)
+        val seedMap = input.parseSeedMap(::parseSeeds)
+        return seedMap.findSmallesLocation()
     }
 
     override fun part2(input: List<String>): Any {
-        return -1
+//        return -1
+        val seedMap = input.parseSeedMap(::parseSeeds2)
+        return seedMap.findSmallesLocation()
     }
 
 }
@@ -20,78 +22,121 @@ fun main() {
     Day05().execute().printResults()
 }
 
-private fun List<String>.extractParts(start: Int): Pair<Int, List<Triple<Long, Long, Long>>> {
-    val parts = mutableListOf<Triple<Long, Long, Long>>()
-    var index = start
-    while (index in indices && this[index].isNotBlank()) {
-        val (destinationStart, sourceStart, steps) = this[index].toLongList()
-        parts.add(Triple(destinationStart, sourceStart, steps))
-        index++
-    }
-    return index to parts
+private fun determineTarget(num: Long, map: List<Pair<Range, Range>>): Long {
+    return map.find { mapRanges -> mapRanges.first.contains(num) }
+        ?.let { foundMap ->
+            val offset = num - foundMap.first.startInclusive
+            foundMap.second.startInclusive + offset
+        }
+        ?: num
 }
 
-private fun List<String>.parse(): SeedMap {
-    val seeds = this[0].substring("seeds: ".length).toLongList()
-    val seedToSoil = extractParts(3)
-    val soilToFertilizer = extractParts(seedToSoil.first + 2)
-    val fertlizerToWater = extractParts(soilToFertilizer.first + 2)
-    val waterToLight = extractParts(fertlizerToWater.first + 2)
-    val lightToTemperature = extractParts(waterToLight.first + 2)
-    val temperatureToHumidity = extractParts(lightToTemperature.first + 2)
-    val humidityToLocation = extractParts(temperatureToHumidity.first + 2)
 
+private fun SeedMap.findSmallesLocation(): Long {
+    return seeds.asSequence()
+        .map {
+            generateSequence(it.startInclusive) { current ->
+                (current + 1).takeIf { next -> next <= it.endInclusive }
+            }
+                .map { num -> determineTarget(num, soil) }
+                .map { num -> determineTarget(num, fertilizer) }
+                .map { num -> determineTarget(num, water) }
+                .map { num -> determineTarget(num, light) }
+                .map { num -> determineTarget(num, temperature) }
+                .map { num -> determineTarget(num, humidiy) }
+                .map { num -> determineTarget(num, location) }
+                .min()
+        }
+        .min()
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+private data class SeedMap(
+    val seeds: List<Range>,
+    val soil: List<Pair<Range, Range>>,
+    val fertilizer: List<Pair<Range, Range>>,
+    val water: List<Pair<Range, Range>>,
+    val light: List<Pair<Range, Range>>,
+    val temperature: List<Pair<Range, Range>>,
+    val humidiy: List<Pair<Range, Range>>,
+    val location: List<Pair<Range, Range>>,
+) {
+
+}
+private fun List<String>.createIndexMap(): Map<String, Int> {
+    val result = mutableMapOf<String, Int>()
+    mapIndexed { i, r ->
+        if (r.matches("[a-z]+.*".toRegex())) {
+            result[r] = i
+        }
+    }
+    return result
+}
+private fun parseSeeds(string: String): List<Range> {
+    val values = string.substring("seeds: ".length).toLongList()
+    return values.map { Range(it, it) }
+}
+private fun parseSeeds2(string: String): List<Range> {
+    val values = string.substring("seeds: ".length).toLongList()
+    return values.windowed(size = 2, step = 2).map { Range(it[0], it[0] + it[1] - 1) }
+}
+private fun List<String>.parseSeedMap(f: (String) -> List<Range>): SeedMap {
+    val index = createIndexMap()
     return SeedMap(
-        seeds = seeds,
-        seedToSoil = seedToSoil.second,
-        soilToFertilizer = soilToFertilizer.second,
-        fertlizerToWater = fertlizerToWater.second,
-        waterToLight = waterToLight.second,
-        lightToTemperature = lightToTemperature.second,
-        temperatureToHumidity = temperatureToHumidity.second,
-        humidityToLocation = humidityToLocation.second
+        seeds = f(this[0]),
+        soil = extractParts(index["seed-to-soil map:"]!!),
+        fertilizer = extractParts(index["soil-to-fertilizer map:"]!!),
+        water = extractParts(index["fertilizer-to-water map:"]!!),
+        light = extractParts(index["water-to-light map:"]!!),
+        temperature = extractParts(index["light-to-temperature map:"]!!),
+        humidiy = extractParts(index["temperature-to-humidity map:"]!!),
+        location = extractParts(index["humidity-to-location map:"]!!)
     )
 }
 
-private data class SeedMap(
-    val seeds: List<Long>,
-    val seedToSoil: List<Triple<Long, Long, Long>>,
-    val soilToFertilizer: List<Triple<Long, Long, Long>>,
-    val fertlizerToWater: List<Triple<Long, Long, Long>>,
-    val waterToLight: List<Triple<Long, Long, Long>>,
-    val lightToTemperature: List<Triple<Long, Long, Long>>,
-    val temperatureToHumidity: List<Triple<Long, Long, Long>>,
-    val humidityToLocation: List<Triple<Long, Long, Long>>
-)
+private data class Range(val startInclusive: Long, val endInclusive: Long) {
 
-private fun Triple<Long, Long, Long>.getDestination(seed: Long): Long? {
-    if (seed in second .. second + third) {
-        val diff = seed - second
-        return first + diff
+    fun contains(value: Long): Boolean {
+        return value in startInclusive .. endInclusive
     }
-    return null
-}
 
-private fun List<Triple<Long, Long, Long>>.getDestination(seed: Long): Long {
-    return firstNotNullOfOrNull { it.getDestination(seed) } ?: seed
-}
-
-private val seedCache = mutableMapOf<Long, Long>()
-private fun SeedMap.getLocationOfSeed(seed: Long): Long {
-    return seedCache.getOrPut(seed) {
-        seedToSoil.getDestination(seed)
-            .let { soilToFertilizer.getDestination(it) }
-            .let { fertlizerToWater.getDestination(it) }
-            .let { waterToLight.getDestination(it) }
-            .let { lightToTemperature.getDestination(it) }
-            .let { temperatureToHumidity.getDestination(it) }
-            .let { humidityToLocation.getDestination(it) }
+    fun offset(value: Long): Int {
+        return (startInclusive..endInclusive).mapIndexedNotNull { i, v ->
+            if (v == value) {
+                i
+            } else {
+                null
+            }
+        }.first()
     }
 }
-
-private fun smallestLocation(seedMap: SeedMap, seeds: List<Long>): Long {
-    return seeds.minOf {
-        seedMap.getLocationOfSeed(it)
+private fun List<String>.extractParts(start: Int): List<Pair<Range, Range>> {
+    val parts = mutableListOf<Pair<Range, Range>>()
+    var index = start + 1
+    while (index in indices && this[index].isNotBlank()) {
+        val (destinationStart, sourceStart, steps) = this[index].toLongList()
+        parts.add(
+            Range(sourceStart, sourceStart + steps - 1)
+            to
+            Range(destinationStart, destinationStart + steps - 1)
+        )
+        index++
     }
+    return parts
 }
-
