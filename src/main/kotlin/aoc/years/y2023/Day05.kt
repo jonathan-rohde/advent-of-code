@@ -3,8 +3,10 @@ package aoc.years.y2023
 import aoc.common.Day
 import aoc.common.printResults
 import utils.toLongList
+import kotlin.math.max
+import kotlin.math.min
 
-class Day05 : Day(year = 2023, day = 5, test = 35L to null) {
+class Day05 : Day(year = 2023, day = 5, test = 35L to 46L) {
     override fun part1(input: List<String>): Any {
         val seedMap = input.parseSeedMap(::parseSeeds)
         return seedMap.findSmallesLocation()
@@ -31,23 +33,78 @@ private fun determineTarget(num: Long, map: List<Pair<Range, Range>>): Long {
         ?: num
 }
 
+private fun determineSource(num: Long, map: List<Pair<Range, Range>>): Long {
+    return map.find { mapRanges -> mapRanges.second.contains(num) }
+        ?.let { foundMap ->
+            val offset = num - foundMap.second.startInclusive
+            foundMap.first.startInclusive + offset
+        }
+        ?: num
+}
+
+private fun SeedMap.minimum(): Long =
+    listOf(soil, fertilizer, water, light, temperature, humidiy, location)
+        .flatten()
+        .map { it.second }
+        .minBy { it.startInclusive }
+        .startInclusive
+
+private fun SeedMap.maximum(): Long =
+    listOf(soil, fertilizer, water, light, temperature, humidiy, location)
+        .flatten()
+        .map { it.second }
+        .maxBy { it.endInclusive }
+        .endInclusive
+
+private val cache = mutableMapOf<Long, Long>()
 
 private fun SeedMap.findSmallesLocation(): Long {
-    return seeds.asSequence()
-        .map {
-            generateSequence(it.startInclusive) { current ->
-                (current + 1).takeIf { next -> next <= it.endInclusive }
-            }
-                .map { num -> determineTarget(num, soil) }
-                .map { num -> determineTarget(num, fertilizer) }
-                .map { num -> determineTarget(num, water) }
-                .map { num -> determineTarget(num, light) }
-                .map { num -> determineTarget(num, temperature) }
-                .map { num -> determineTarget(num, humidiy) }
-                .map { num -> determineTarget(num, location) }
-                .min()
+    val min = minimum()
+    val max = maximum()
+//    val list = seeds.sortedBy { it.startInclusive }.map {
+    val list = (min..max).asSequence()
+//        generateSequence(it.startInclusive) { current ->
+//            (current + 1).takeIf { next -> next <= it.endInclusive }
+//        }
+        .map { possibleLoc ->
+            possibleLoc.let { num -> determineSource(num, location) }
+            .let { num -> determineSource(num, humidiy) }
+            .let { num -> determineSource(num, temperature) }
+            .let { num -> determineSource(num, light) }
+            .let { num -> determineSource(num, water) }
+            .let { num -> determineSource(num, fertilizer) }
+            .let { num -> determineSource(num, soil) }
         }
-        .min()
+
+        .first { seed ->
+            seeds.any { it.startInclusive <= seed && it.endInclusive >= seed }
+        }
+//    }
+    return listOf(list).map { s ->
+        determineTarget(s, soil)
+            .let { num -> determineTarget(num, fertilizer) }
+            .let { num -> determineTarget(num, water) }
+            .let { num -> determineTarget(num, light) }
+            .let { num -> determineTarget(num, temperature) }
+            .let { num -> determineTarget(num, humidiy) }
+            .let { num -> determineTarget(num, location) }
+    }.min()
+
+//    return seeds.asSequence()
+//        .map {
+//            generateSequence(it.startInclusive) { current ->
+//                (current + 1).takeIf { next -> next <= it.endInclusive }
+//            }
+//                .map { num -> determineTarget(num, soil) }
+//                .map { num -> determineTarget(num, fertilizer) }
+//                .map { num -> determineTarget(num, water) }
+//                .map { num -> determineTarget(num, light) }
+//                .map { num -> determineTarget(num, temperature) }
+//                .map { num -> determineTarget(num, humidiy) }
+//                .map { num -> determineTarget(num, location) }
+//                .min()
+//        }
+//        .min()
 }
 
 
