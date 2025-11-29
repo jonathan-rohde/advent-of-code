@@ -56,15 +56,16 @@ private fun List<String>.findUniverse(): List<UniverseCoord> {
 }
 
 private fun List<UniverseCoord>.combinations(): List<Pair<UniverseCoord, UniverseCoord>> {
-    val result = mutableListOf<Pair<UniverseCoord, UniverseCoord>>()
-    forEach { one ->
-        this.forEach { two ->
+    val result = mutableSetOf<Pair<UniverseCoord, UniverseCoord>>()
+    val data = sortedWith(compareBy({ it.y }, { it.x }))
+    data.forEach { one ->
+        data.forEach { two ->
             if (!result.contains(one to two) && !result.contains(two to one) && one != two) {
                 result.add(one to two)
             }
         }
     }
-    return result
+    return result.toList()
 }
 
 private fun List<Int>.overlaps(start: Int, end: Int): Int {
