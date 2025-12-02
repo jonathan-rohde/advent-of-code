@@ -32,25 +32,21 @@ private fun String.parseRanges(): List<Pair<Long, Long>> {
 
 private val idCache = mutableMapOf<Long, Boolean>()
 
-private fun Long.isValidId(): Boolean {
-    if (idCache.containsKey(this)) return idCache[this]!!
-
-    return with(toString()) {
+private fun Long.isValidId() = idCache.getOrPut(this) {
+    with(toString()) {
         if (length % 2 != 0) return true
         val (first, second) = take(length / 2) to takeLast(length / 2) // to str.substring(str.length - mid)
         (first != second)
-    }.also { idCache[this] = it }
+    }
 }
 
 private val patternCache = mutableMapOf<Long, Boolean>()
 
-private fun Long.isPeriodicId(): Boolean {
-    if (patternCache.containsKey(this)) return patternCache[this]!!
-
-    return with(toString()) {
+private fun Long.isPeriodicId() = patternCache.getOrPut((this)) {
+    with(toString()) {
         (1..length / 2).any { size ->
             val repeated = this.take(size).repeat(length / size)
             repeated == this
         }
-    }.also { patternCache[this] = it }
+    }
 }
