@@ -2,6 +2,8 @@ package aoc.years.y2025
 
 import aoc.common.Day
 import aoc.common.printResults
+import java.time.OffsetDateTime
+import java.time.ZoneId
 
 class Day02 : Day(year = 2025, day = 2, test = 1227775554L to 4174379265L) {
     override fun part1(input: List<String>): Long {
@@ -33,16 +35,17 @@ private fun String.parseRanges(): List<Pair<Long, Long>> {
         }
 }
 
+private val idCache = mutableMapOf<Long, Boolean>()
+
 private fun Long.isValidId(): Boolean {
+    if (idCache.containsKey(this)) {
+        return idCache[this]!!
+    }
     val str = toString()
     if (str.length % 2 != 0) return true
     val mid = str.length / 2
     val (first, second) = str.take(mid) to str.substring(str.length - mid)
-    return (first != second).also {
-        if (!it) {
-            println("Invalid ID2: $this")
-        }
-    }
+    return (first != second).also { idCache[this] = it }
 }
 
 private val patternCache = mutableMapOf<Long, Boolean>()
