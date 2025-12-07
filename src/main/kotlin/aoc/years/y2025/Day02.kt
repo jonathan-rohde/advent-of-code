@@ -12,7 +12,6 @@ class Day02 : Day(year = 2025, day = 2, test = 1227775554L to 4174379265L) {
 
     override fun part2(input: List<String>): Long {
         return input[0].parseRanges().sumOf {
-            println("Processing range: ${it.first} to ${it.second}")
             (it.first..it.second).filter { id -> id.isPeriodicId() }.sum()
         }
     }
