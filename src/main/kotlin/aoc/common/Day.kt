@@ -85,11 +85,14 @@ data class PartResult(
 )
 
 fun Result.printResults() {
-    testPart1.second.println()
-    testPart2.second.println()
-
-    part1.distinct.joinToString(", ").println()
-    part2.distinct.joinToString(", ").println()
+    println("""
+        -------- Results --------
+        Test Part 1: ${testPart1.second}
+        Test Part 2: ${testPart2.second}
+        
+        Part 1: ${part1.distinct.joinToString(", ")}
+        Part 2: ${part2.distinct.joinToString(", ")}
+    """.trimIndent())
 }
 
 internal infix fun List<Pair<Pair<Duration, Any>, Pair<Duration, Any>>>.join(testResults: Pair<Pair<Duration, Any>, Pair<Duration, Any>>) : Result {

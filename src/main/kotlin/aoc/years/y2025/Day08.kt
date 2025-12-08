@@ -2,24 +2,31 @@ package aoc.years.y2025
 
 import aoc.common.Day
 import aoc.common.printResults
-import kotlin.math.abs
-import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
+import kotlin.time.measureTimedValue
 
-class Day08 : Day(year = 2025, day = 8, test = null to null, testLimit1 = 10, limit1 = 1000) {
+class Day08 : Day(year = 2025, day = 8, test = 40L to 25272L, testLimit1 = 10, limit1 = 1000) {
     override fun part1(input: List<String>, limit: Int): Long {
-        val nodes = input.map { it.parseNode() }
-
-        val circuits = nodes.connectCircuits(limit)
-        return circuits.sortedByDescending { it.size }.take(3).fold(1L) { acc, set -> acc * set.size }
+        return measureTimedValue {
+            val nodes = input.map { it.parseNode() }
+            val smallestJoints = nodes.createMap().entries.sortedBy { it.value }.take(limit).map { it.key }
+            smallestJoints.connectCircuits().sortedByDescending { it.size }.take(3).fold(1L) { acc, set -> acc * set.size }
+        }.also { println("part1: ${it.duration}") }.value
     }
 
     override fun part2(input: List<String>): Long {
-//        return -1L
-        val nodes = input.map { it.parseNode() }
-        val (a, b) = nodes.connectAllCircuits() ?: return -1
-        return a.x.toLong() * b.x.toLong()
+        return measureTimedValue {
+            val nodes = input.map { it.parseNode() }
+            val smallestJoints = nodes.createMap()
+                .entries
+                .sortedBy { it.value }
+                .map { it.key }
+            nodes.connectAllCircuits(smallestJoints)?.let {
+                val (a, b) = it
+                a.x.toLong() * b.x.toLong()
+            }!!
+        }.also { println("part2: ${it.duration}") }.value
     }
 }
 
@@ -28,17 +35,19 @@ fun main() {
 }
 
 private fun List<CircuitNode>.createMap(): Map<Pair<CircuitNode, CircuitNode>, Double> {
-    val map = mutableMapOf<Pair<CircuitNode, CircuitNode>, Double>()
-    indices.forEach { i ->
-        (i + 1 until size).forEach { j ->
-            val nodeA = this[i]
-            val nodeB = this[j]
-            val pair = sortedPair(nodeA, nodeB)
-            val distance = nodeA.distanceTo(nodeB)
-            map[pair] = distance
+    return measureTimedValue {
+        val map = mutableMapOf<Pair<CircuitNode, CircuitNode>, Double>()
+        indices.forEach { i ->
+            (i + 1 until size).forEach { j ->
+                val nodeA = this[i]
+                val nodeB = this[j]
+                val pair = sortedPair(nodeA, nodeB)
+                val distance = nodeA.distanceTo(nodeB)
+                map[pair] = distance
+            }
         }
-    }
-    return map
+        map
+    }.also { println("createMap: ${it.duration}") }.value
 }
 
 private fun String.parseNode(): CircuitNode {
@@ -58,15 +67,11 @@ private data class CircuitNode(
 private fun sortedPair(a: CircuitNode, b: CircuitNode): Pair<CircuitNode, CircuitNode> =
     listOf(a, b).sortedWith(compareBy({ it.x }, { it.y }, { it.z })).let { it[0] to it[1] }
 
-private fun List<CircuitNode>.connectCircuits(limit: Int): List<Set<CircuitNode>> {
-    val visited = mutableSetOf<Pair<CircuitNode, CircuitNode>>()
+private fun List<Pair<CircuitNode, CircuitNode>>.connectCircuits(): List<Set<CircuitNode>> {
     var circuits = mutableListOf<MutableSet<CircuitNode>>()
 
-    var iteration = 0
-    while (iteration < limit) {
-        val pair = findClosestPair(visited) ?: return circuits
-        visited.add(pair)
-        val (nodeA, nodeB) = pair
+    this.forEach {
+        val (nodeA, nodeB) = it
         val circuitA = circuits.find { nodeA in it }
         val circuitB = circuits.find { nodeB in it }
 
@@ -77,25 +82,21 @@ private fun List<CircuitNode>.connectCircuits(limit: Int): List<Set<CircuitNode>
                     circuitA.addAll(circuitB)
                     circuits = circuits.filter { it != circuitB }.toMutableList()
                 }
-                iteration++
             }
 
             circuitA == null && circuitB == null -> {
                 // new circuit
                 circuits.add(mutableSetOf(nodeA, nodeB))
-                iteration++
             }
 
             circuitA != null -> {
                 // add to A
                 circuitA.add(nodeB)
-                iteration++
             }
 
             circuitB != null -> {
                 // add to B
                 circuitB.add(nodeA)
-                iteration++
             }
         }
     }
@@ -103,15 +104,12 @@ private fun List<CircuitNode>.connectCircuits(limit: Int): List<Set<CircuitNode>
     return circuits
 }
 
-private fun List<CircuitNode>.connectAllCircuits(): Pair<CircuitNode, CircuitNode>? {
-    val visited = mutableSetOf<Pair<CircuitNode, CircuitNode>>()
+private fun List<CircuitNode>.connectAllCircuits(joints: List<Pair<CircuitNode, CircuitNode>>): Pair<CircuitNode, CircuitNode>? {
     var circuits = mutableSetOf<MutableSet<CircuitNode>>()
 
     var iteration = 0
-    while (true) {
-        val pair = findClosestPair(visited) ?: return null
-        visited.add(pair)
-        val (nodeA, nodeB) = pair
+    joints.forEach {
+        val (nodeA, nodeB) = it
         val circuitA = circuits.find { nodeA in it }
         val circuitB = circuits.find { nodeB in it }
 
@@ -145,33 +143,8 @@ private fun List<CircuitNode>.connectAllCircuits(): Pair<CircuitNode, CircuitNod
         }
 
         if (iteration > 10 && circuits.size == 1 && circuits.first().size == this.size) {
-            println("All connected after $iteration iterations")
-            println(pair)
-            return pair
+            return it
         }
     }
-}
-
-private fun List<CircuitNode>.findClosestPair(
-    visited: Set<Pair<CircuitNode, CircuitNode>>
-): Pair<CircuitNode, CircuitNode>? {
-    var minDistance = Double.MAX_VALUE
-    var closestPair: Pair<CircuitNode, CircuitNode>? = null
-
-    indices.forEach { i ->
-        (i + 1 until size).forEach { j ->
-            val nodeA = this[i]
-            val nodeB = this[j]
-            val pair = sortedPair(nodeA, nodeB)
-            if (pair in visited) return@forEach
-
-            val distance = nodeA.distanceTo(nodeB)
-            if (distance < minDistance) {
-                minDistance = distance
-                closestPair = pair
-            }
-        }
-    }
-
-    return closestPair
+    return null
 }
