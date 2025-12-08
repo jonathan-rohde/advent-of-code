@@ -34,9 +34,9 @@ fun main() {
     Day08().execute().printResults()
 }
 
-private fun List<CircuitNode>.createMap(): Map<Pair<CircuitNode, CircuitNode>, Double> {
+private fun List<CircuitNode>.createMap(): Map<Pair<CircuitNode, CircuitNode>, Long> {
     return measureTimedValue {
-        val map = mutableMapOf<Pair<CircuitNode, CircuitNode>, Double>()
+        val map = mutableMapOf<Pair<CircuitNode, CircuitNode>, Long>()
         indices.forEach { i ->
             (i + 1 until size).forEach { j ->
                 val nodeA = this[i]
@@ -61,8 +61,10 @@ private data class CircuitNode(
     val z: Int
 ) {
     fun distanceTo(other: CircuitNode) =
-        sqrt((x - other.x).toDouble().pow(2) + (y - other.y).toDouble().pow(2) + (z - other.z).toDouble().pow(2))
+        (x - other.x).square() + (y - other.y).square() + (z - other.z).square()
 }
+
+private fun Int.square(): Long = this.toLong().let { it * it }
 
 private fun sortedPair(a: CircuitNode, b: CircuitNode): Pair<CircuitNode, CircuitNode> =
     listOf(a, b).sortedWith(compareBy({ it.x }, { it.y }, { it.z })).let { it[0] to it[1] }
