@@ -12,7 +12,11 @@ abstract class Day(
     val day: Int,
     val test: Pair<Any?, Any?> = null to null,
     val testFile1: String = "Day${day.toString().padStart(2, '0')}_test",
-    val testFile2: String = "Day${day.toString().padStart(2, '0')}_test"
+    val testFile2: String = "Day${day.toString().padStart(2, '0')}_test",
+    val testLimit1: Int = 0,
+    val limit1: Int = 0,
+    val testLimit2: Int = 0,
+    val limit2: Int = 0
 ) {
 
     fun execute(runs: Int = 1): Result {
@@ -32,7 +36,8 @@ abstract class Day(
     }
 
     private fun executePart1(input: List<String>, test: Boolean = false) : Pair<Duration, Any> {
-        val result = measureTimedValue { part1(input) }
+        val limit = if (test) testLimit1 else limit1
+        val result = measureTimedValue { part1(input, limit) }
 
         if (test) {
             check(result.value == this.test.first) {
@@ -44,7 +49,8 @@ abstract class Day(
     }
 
     private fun executePart2(input: List<String>, test: Boolean = false) : Pair<Duration, Any> {
-        val result = measureTimedValue { part2(input) }
+        val limit = if (test) testLimit2 else limit2
+        val result = measureTimedValue { part2(input, limit) }
 
         if (test) {
             check(result.value == this.test.second) {
@@ -55,8 +61,11 @@ abstract class Day(
         return result.duration to result.value
     }
 
-    abstract fun part1(input: List<String>): Any
-    abstract fun part2(input: List<String>): Any
+    open fun part1(input: List<String>, limit: Int): Any = part1(if (limit > 0) input.take(limit) else input)
+    open fun part2(input: List<String>, limit: Int): Any = part2(if (limit > 0) input.take(limit) else input)
+
+    open fun part1(input: List<String>): Any = -1
+    open fun part2(input: List<String>): Any = -1
 }
 
 data class Result(
