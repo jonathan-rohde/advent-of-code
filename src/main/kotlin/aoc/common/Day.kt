@@ -64,7 +64,7 @@ abstract class Day(
 
         val testResultOutput = if (test) {
             check(result.value == this.test.second) {
-                "${this.test.second} != $result"
+                "${this.test.second} != ${result.value}"
             }
         } else null
 
