@@ -1,6 +1,5 @@
 package aoc.common
 
-import utils.println
 import utils.readInput
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
@@ -19,7 +18,7 @@ abstract class Day(
     val limit2: Int = 0
 ) {
 
-    fun execute(runs: Int = 1): Result {
+    fun execute(): Result {
         val dayString = day.toString().padStart(2, '0')
         val fileName = "Day$dayString"
         val testInput = readInput(testFile1, year)
@@ -27,38 +26,49 @@ abstract class Day(
         val input = readInput(fileName, year)
 
         val testResults = executePart1(testInput, test.first != null) to executePart2(testInput2, test.second != null)
-        val results = (0 until runs).map {
-            val part1 = executePart1(input)
-            val part2 = executePart2(input)
-            part1 to part2
-        }
-        return results join testResults
+        val part1 = executePart1(input)
+        val part2 = executePart2(input)
+        return Result(
+            testPart1 = testResults.first.first,
+            test1Result = testResults.first.second,
+            testPart2 = testResults.second.first,
+            test2Result = testResults.second.second,
+            part1 = part1.first,
+            part2 = part2.first
+        )
     }
 
-    private fun executePart1(input: List<String>, test: Boolean = false) : Pair<Duration, Any> {
+    private fun executePart1(input: List<String>, test: Boolean = false) : Pair<Pair<Duration, Any>, String?> {
         val limit = if (test) testLimit1 else limit1
         val result = measureTimedValue { part1(input, limit) }
 
-        if (test) {
+        val testResultOutput = if (test) {
             check(result.value == this.test.first) {
                 "${this.test.first} != ${result.value}"
             }
-        }
+        } else null
 
-        return result.duration to result.value
+        return (result.duration to result.value) to testResultOutput
     }
 
-    private fun executePart2(input: List<String>, test: Boolean = false) : Pair<Duration, Any> {
+    private fun check(condition: Boolean, lazyMessage: () -> String): String? {
+        if (!condition) {
+            return lazyMessage()
+        }
+        return null
+    }
+
+    private fun executePart2(input: List<String>, test: Boolean = false) : Pair<Pair<Duration, Any>, String?> {
         val limit = if (test) testLimit2 else limit2
         val result = measureTimedValue { part2(input, limit) }
 
-        if (test) {
+        val testResultOutput = if (test) {
             check(result.value == this.test.second) {
                 "${this.test.second} != $result"
             }
-        }
+        } else null
 
-        return result.duration to result.value
+        return (result.duration to result.value) to testResultOutput
     }
 
     open fun part1(input: List<String>, limit: Int): Any = part1(if (limit > 0) input.take(limit) else input)
@@ -71,8 +81,10 @@ abstract class Day(
 data class Result(
     val testPart1: Pair<Duration, Any>,
     val testPart2: Pair<Duration, Any>,
-    val part1: PartResult,
-    val part2: PartResult
+    val test1Result: String? = null,
+    val test2Result: String? = null,
+    val part1: Pair<Duration, Any>,
+    val part2: Pair<Duration, Any>
 )
 
 data class PartResult(
@@ -85,44 +97,22 @@ data class PartResult(
 )
 
 fun Result.printResults() {
+    val testPart1 = if (test1Result != null) {
+        "FAILED: $test1Result"
+    } else {
+        "${testPart1.second}"
+    }
+    val testPart2 = if (test2Result != null) {
+        "FAILED: $test2Result"
+    } else {
+        "${testPart2.second}"
+    }
     println("""
         -------- Results --------
-        Test Part 1: ${testPart1.second}
-        Test Part 2: ${testPart2.second}
+        Test Part 1: $testPart1
+        Test Part 2: $testPart2
         
-        Part 1: ${part1.distinct.joinToString(", ")}
-        Part 2: ${part2.distinct.joinToString(", ")}
+        Part 1: ${part1.second}
+        Part 2: ${part2.second}
     """.trimIndent())
-}
-
-internal infix fun List<Pair<Pair<Duration, Any>, Pair<Duration, Any>>>.join(testResults: Pair<Pair<Duration, Any>, Pair<Duration, Any>>) : Result {
-    val part1 = map { it.first }
-    val part2 = map { it.second }
-    return Result(
-        testPart1 = testResults.first,
-        testPart2 = testResults.second,
-        part1 = part1.statistics(),
-        part2 = part2.statistics()
-    )
-}
-
-private fun  List<Pair<Duration, Any>>.statistics(): PartResult {
-    var min = Long.MAX_VALUE.nanoseconds
-    var max = Long.MIN_VALUE.nanoseconds
-    var sum = 0.0.nanoseconds
-    map { it.first }.forEach { it ->
-        if (it < min) min = it
-        if (it > max) max = it
-        sum += it
-
-    }
-    val avg = sum / size
-    val median = map { it.first }.sorted()[size / 2]
-    return PartResult(
-        min = min,
-        max = max,
-        avg = avg,
-        median = median,
-        distinct = map { it.second }.toSet()
-    )
 }

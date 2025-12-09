@@ -4,7 +4,7 @@ import aoc.common.RunnerService
 import aoc.common.Year
 
 class Year2024 : Year {
-    override fun execute(days: List<Int>, opaqueResults: Boolean, runs: Int) {
+    override fun execute(days: List<Int>, opaqueResults: Boolean) {
         val runner = RunnerService(
             days = listOf(
                 // Add your days here
@@ -35,8 +35,7 @@ class Year2024 : Year {
                 Day25()
                 ),
             year = 2024,
-            opaqueResults = opaqueResults,
-            executeRuns = runs
+            opaqueResults = opaqueResults
         )
         runner.execute(limit = days)
     }
