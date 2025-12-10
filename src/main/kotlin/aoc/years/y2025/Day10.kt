@@ -14,15 +14,16 @@ class Day10 : Day(year = 2025, day = 10, test = 7L to 33L) {
             }
     }
 
-//    override fun part2(input: List<String>): Long {
-//        return input.map { it.parseMachine() }
+    override fun part2(input: List<String>): Long {
+        return input.map { it.parseMachine() }.asSequence()
+            .map { it.minStepsJoltage().also { println(it) } }
+            .sum()
 //            .sumOf {
 //                it.minStepsJoltage().also {
 //                    println(it)
-//                    cacheJoltage.clear()
 //                }
 //            }
-//    }
+    }
 }
 
 fun main() {
@@ -38,8 +39,8 @@ private fun Triple<List<Boolean>, List<List<Int>>, List<Int>>.minSteps(): Long {
 
 private fun Triple<List<Boolean>, List<List<Int>>, List<Int>>.minStepsJoltage(): Long {
     val (_, buttons, joltages) = this
-    val target = joltages.map { 0 }
-    return minStepsJoltage(joltages, target, buttons)
+    val start = joltages.map { 0 }
+    return minStepsJoltage(joltages, start, buttons)
 }
 
 private val cache = mutableMapOf<Pair<List<Boolean>, List<List<Int>>>, Long>()
@@ -61,18 +62,22 @@ private fun minSteps(current: List<Boolean>, target: List<Boolean>, buttons: Lis
 }
 
 private val cacheJoltage = mutableMapOf<Pair<List<Int>, List<List<Int>>>, Long>()
-private fun minStepsJoltage(current: List<Int>, target: List<Int>, buttons: List<List<Int>>, previousStates: Set<List<Int>> = emptySet()): Long {
-    return cacheJoltage.getOrPut(target to buttons) {
-        if (current.isMatch(target)) return@getOrPut 0L
-        buttons.minOf {
-            val next = current.toMutableList()
-            next.toggle(it)
-            if (next in previousStates || next.isBiggerThan(target)) {
-                return@minOf Integer.MAX_VALUE.toLong()
+private fun minStepsJoltage(current: List<Int>, target: List<Int>, buttons: List<List<Int>>, previousStates: Set<List<Int>> = emptySet(), counter: Int = 0): Long {
+    if (current.isMatch(target)) return 0L
+    if (counter > 300) return Integer.MAX_VALUE.toLong()
+    return cacheJoltage.getOrPut(current to buttons) {
+        buttons.minOf {button ->
+            val maxButtonPresses = current.filterIndexed { index, _ -> index in button }.minOrNull() ?: 1
+            (maxButtonPresses downTo 0).minOf { presses ->
+                val next = current.toMutableList()
+                repeat(presses) {next.toggle(button)}
+                if (next in previousStates || next.isNegative()) {
+                    return@minOf Integer.MAX_VALUE.toLong()
+                }
+                val states = previousStates.toMutableSet()
+                states.add(current)
+                presses + minStepsJoltage(next, target, buttons, states, counter + presses)
             }
-            val states = previousStates.toMutableSet()
-            states.add(current)
-            1 + minStepsJoltage(next, target, buttons, states)
         }
     }
 }
@@ -91,8 +96,8 @@ private fun MutableList<Int>.toggle(button: List<Int>) {
     }
 }
 
-private fun List<Int>.isBiggerThan(other: List<Int>): Boolean {
-    return this.indices.any { this[it] > other[it] }
+private fun List<Int>.isNegative(): Boolean {
+    return this.indices.any { this[it] < 0 }
 }
 
 private fun List<Any>.isMatch(other: List<Any>): Boolean {
