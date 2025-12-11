@@ -18,7 +18,7 @@ class Year2025 : Year {
                 Day08(),
                 Day09(),
 //                Day10(),
-//                Day11(),
+                Day11(),
 //                Day12()
                 ),
             year = 2025,
