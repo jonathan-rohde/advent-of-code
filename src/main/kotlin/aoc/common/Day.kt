@@ -28,14 +28,50 @@ abstract class Day(
         val testResults = executePart1(testInput, test.first != null) to executePart2(testInput2, test.second != null)
         val part1 = executePart1(input)
         val part2 = executePart2(input)
+
+        val test1Result = testResults.showTestResult(1)
+        val test2Result = testResults.showTestResult(2)
+
         return Result(
             testPart1 = testResults.first.first,
-            test1Result = testResults.first.second,
+            test1Result = test1Result, //"${testResults.first.second ?: ""}${warnOverflow(testResults.first.first.second, 1)}",
             testPart2 = testResults.second.first,
-            test2Result = testResults.second.second,
+            test2Result = test2Result, //"${testResults.second.second ?: ""}${warnOverflow(testResults.second.first.second, 2)}",
             part1 = part1.first,
             part2 = part2.first
         )
+    }
+
+    private fun Pair<Pair<Pair<Duration, Any>, String?>, Pair<Pair<Duration, Any>, String?>>.showTestResult(part: Int): String? {
+        val isIntOverflow = if (part == 1) {
+            this.first.first.second is Int || this.first.first.second is Float
+        } else {
+            this.second.first.second is Int || this.first.first.second is Float
+        }
+        val hasTestFailure = if (part == 1) {
+            this.first.second != null
+        } else {
+            this.second.second != null
+        }
+
+        if (!isIntOverflow && !hasTestFailure) {
+            return null
+        }
+        if (isIntOverflow && hasTestFailure) {
+            return "check(${if (part == 1) this.first.second else this.second.second}) ${warnOverflow(if (part == 1) this.first.first.second else this.second.first.second, part)}"
+        }
+        if (isIntOverflow) {
+            return warnOverflow(if (part == 1) this.first.first.second else this.second.first.second, part)
+        }
+        return if (part == 1) this.first.second else this.second.second
+    }
+
+    private fun warnOverflow(value: Any, part: Int): String {
+        return if (value is Int) {
+            "🔥 Warning: Part $part returned Int, consider using Long to avoid overflow."
+        } else if (value is Float) {
+            "🔥 Warning: Part $part returned Float, consider using Double or BigDecimal to avoid overflow."
+        } else ""
     }
 
     private fun executePart1(input: List<String>, test: Boolean = false) : Pair<Pair<Duration, Any>, String?> {
@@ -98,12 +134,12 @@ data class PartResult(
 
 fun Result.printResults() {
     val testPart1 = if (test1Result != null) {
-        "FAILED: $test1Result"
+        "${testPart1.second} $test1Result"
     } else {
         "${testPart1.second}"
     }
     val testPart2 = if (test2Result != null) {
-        "FAILED: $test2Result"
+        "${testPart2.second} $test2Result"
     } else {
         "${testPart2.second}"
     }
