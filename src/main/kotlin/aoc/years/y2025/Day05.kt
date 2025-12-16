@@ -1,14 +1,34 @@
 package aoc.years.y2025
 
 import aoc.common.Day
+import aoc.common.Part
 import aoc.common.printResults
 
-class Day05 : Day(year = 2025, day = 5, test = 3 to 14L) {
-    override fun part1(input: List<String>): Int {
+private val testInput = """
+    3-5
+    10-14
+    16-20
+    12-18
+
+    1
+    5
+    8
+    11
+    17
+    32
+""".trimIndent()
+
+class Day05 : Day(
+    year = 2025,
+    day = 5,
+    part1 = Part(test = 3L, testInput = testInput),
+    part2 = Part(test = 14L, testInput = testInput),
+) {
+    override fun part1(input: List<String>): Long {
         val (ranges, numbers) = input.parseRangesAndNumbers()
         return numbers.count { num ->
             ranges.any { range -> num in range }
-        }
+        }.toLong()
     }
 
     override fun part2(input: List<String>): Long {

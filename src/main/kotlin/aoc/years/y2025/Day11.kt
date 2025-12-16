@@ -3,7 +3,8 @@ package aoc.years.y2025
 import aoc.common.Day
 import aoc.common.printResults
 
-class Day11 : Day(year = 2025, day = 11, test = 5L to 2L, testFile2 = "Day11_test2") {
+//class Day11 : Day(year = 2025, day = 11, test = 5L to 2L, testFile2 = "Day11_test2") {
+class Day11 : Day(year = 2025, day = 11, test = 5L to 2L) {
     override fun part1(input: List<String>): Long {
         return input.toGraph().countPaths(from = "you", to = "out")
     }

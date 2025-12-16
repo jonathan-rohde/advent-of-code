@@ -4,7 +4,8 @@ import aoc.common.Day
 import aoc.common.printResults
 import utils.lcm
 
-class Day08 : Day(year = 2023, day = 8, test = 2 to 6L, testFile2 = "Day08_p2_test") {
+//class Day08 : Day(year = 2023, day = 8, test = 2 to 6L, testFile2 = "Day08_p2_test") {
+class Day08 : Day(year = 2023, day = 8, test = 2 to 6L) {
     override fun part1(input: List<String>): Any {
         val (movement, routes) = input.parseProblem()
         var current = "AAA"

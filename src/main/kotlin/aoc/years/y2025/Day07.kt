@@ -1,9 +1,34 @@
 package aoc.years.y2025
 
 import aoc.common.Day
+import aoc.common.Part
 import aoc.common.printResults
 
-class Day07 : Day(year = 2025, day = 7, test = 21 to 40L) {
+private val testInput = """
+    .......S.......
+    ...............
+    .......^.......
+    ...............
+    ......^.^......
+    ...............
+    .....^.^.^.....
+    ...............
+    ....^.^...^....
+    ...............
+    ...^.^...^.^...
+    ...............
+    ..^...^.....^..
+    ...............
+    .^.^.^.^.^...^.
+    ...............
+""".trimIndent()
+
+class Day07 : Day(
+    year = 2025,
+    day = 7,
+    part1 = Part(test = 21L, testInput = testInput),
+    part2 = Part(test = 40L, testInput = testInput),
+) {
     override fun part1(input: List<String>) = input.countSplits()
 
     override fun part2(input: List<String>) = input.countBeams()
@@ -16,7 +41,7 @@ fun main() {
 private val List<String>.start: Pair<Int, Int>
     get() = 0 to this[0].indexOf('S')
 
-private fun List<String>.countSplits(): Int {
+private fun List<String>.countSplits(): Long {
     val beamIndex = mutableSetOf(start.second)
     return indices.drop(1).sumOf { row ->
         val (newBeamIndex, splitsRecursive) = nextBeams(beamIndex, row)
@@ -29,7 +54,7 @@ private fun List<String>.countSplits(): Int {
 private fun List<String>.nextBeams(
     beamIndex: Set<Int>,
     row: Int
-): Pair<MutableSet<Int>, Int> {
+): Pair<MutableSet<Int>, Long> {
     val newBeamIndex = mutableSetOf<Int>()
     val splits = beamIndex.sumOf { index ->
         moveRay(row, index, newBeamIndex)
@@ -41,7 +66,7 @@ private fun List<String>.moveRay(
     row: Int,
     index: Int,
     newBeamIndex: MutableSet<Int>
-): Int {
+): Long {
     val below = this[row][index]
     return when (below) {
         '.' -> newBeamIndex.add(index).let { 0 }

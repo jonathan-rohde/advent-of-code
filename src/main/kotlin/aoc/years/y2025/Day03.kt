@@ -1,9 +1,21 @@
 package aoc.years.y2025
 
 import aoc.common.Day
+import aoc.common.Part
 import aoc.common.printResults
 
-class Day03 : Day(year = 2025, day = 3, test = 357L to null) {
+private val testInput = """
+    987654321111111
+    811111111111119
+    234234234234278
+    818181911112111
+""".trimIndent()
+class Day03 : Day(
+    year = 2025,
+    day = 3,
+    part1 = Part(test = 357L, testInput = testInput),
+    part2 = Part(test = 3121910778619L, testInput = testInput)
+) {
     override fun part1(input: List<String>): Long {
         return input.sumOf {bank ->
             bank.toBatteries().findMax(2).toLong()

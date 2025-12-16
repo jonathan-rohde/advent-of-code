@@ -1,9 +1,22 @@
 package aoc.years.y2025
 
 import aoc.common.Day
+import aoc.common.Part
 import aoc.common.printResults
 
-class Day06 : Day(year = 2025, day = 6, test = 4277556L to 3263827L) {
+private val testInput = """
+    123 328  51 64 
+     45 64  387 23 
+      6 98  215 314
+    *   +   *   +  
+""".trimIndent()
+
+class Day06 : Day(
+    year = 2025,
+    day = 6,
+    part1 = Part(test = 4277556L, testInput = testInput),
+    part2 = Part(test = 3263827L, testInput = testInput),
+) {
     override fun part1(input: List<String>): Long {
         val grid = input.toGrid()
         return grid[0].indices.sumOf { i ->

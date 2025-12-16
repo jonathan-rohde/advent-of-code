@@ -7,7 +7,7 @@ fun main() {
     Day01().execute().printResults()
 }
 
-class Day01 : Day(2023, 1 ,209 to 281) {
+class Day01 : Day(2023, 1 , 209 to 281) {
     override fun part1(input: List<String>): Int = input.sumOf { extractNumbers(it) }
 
     override fun part2(input: List<String>): Int = input.sumOf { extractNumberWords(it) }

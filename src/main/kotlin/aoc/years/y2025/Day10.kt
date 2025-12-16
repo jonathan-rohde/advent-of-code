@@ -1,12 +1,24 @@
 package aoc.years.y2025
 
 import aoc.common.Day
+import aoc.common.Part
 import aoc.common.printResults
 import utils.readInput
 import utils.testAndPrint
 import utils.toIntList
 
-class Day10 : Day(year = 2025, day = 10, test = 7L to 33L) {
+private val testInput = """
+    [.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
+    [...#.] (0,2,3,4) (2,3) (0,4) (0,1,2) (1,2,3,4) {7,5,12,7,2}
+    [.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) {10,11,11,5,10,5}
+""".trimIndent()
+
+class Day10 : Day(
+    year = 2025,
+    day = 10,
+    part1 = Part(test = 7L, testInput = testInput),
+    part2 = Part(test = -1L, testInput = testInput),
+) {
     override fun part1(input: List<String>): Long {
         return input.map { it.parseMachine() }
             .sumOf {
@@ -15,9 +27,10 @@ class Day10 : Day(year = 2025, day = 10, test = 7L to 33L) {
     }
 
     override fun part2(input: List<String>): Long {
-        return input.map { it.parseMachine() }.asSequence()
-            .map { it.minStepsJoltage().also { println(it) } }
-            .sum()
+        return -1L // not yet solved in kotlin
+//        return input.map { it.parseMachine() }.asSequence()
+//            .map { it.minStepsJoltage().also { println(it) } }
+//            .sum()
 //            .sumOf {
 //                it.minStepsJoltage().also {
 //                    println(it)

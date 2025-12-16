@@ -1,15 +1,34 @@
 package aoc.years.y2025
 
 import aoc.common.Day
+import aoc.common.Part
 import aoc.common.printResults
 
-class Day04 : Day(year = 2025, day = 4, test = 13 to 43) {
-    override fun part1(input: List<String>): Int {
+private val testInput = """
+    ..@@.@@@@.
+    @@@.@.@.@@
+    @@@@@.@.@@
+    @.@@@@..@.
+    @@.@@@@.@@
+    .@@@@@@@.@
+    .@.@.@.@@@
+    @.@@@.@@@@
+    .@@@@@@@@.
+    @.@.@@@.@.
+""".trimIndent()
+
+class Day04 : Day(
+    year = 2025,
+    day = 4,
+    part1 = Part(test = 13L, testInput = testInput),
+    part2 = Part(test = 43L, testInput = testInput),
+) {
+    override fun part1(input: List<String>): Long {
         return input.toGrid()
             .numRolls()
     }
 
-    override fun part2(input: List<String>): Int {
+    override fun part2(input: List<String>): Long {
         return input.toGrid()
             .removeRolls()
     }
@@ -34,14 +53,14 @@ private fun List<CharArray>.iterateAndReturn(block: (x: Int, y: Int) -> Unit) {
     }
 }
 
-private fun List<CharArray>.numRolls(): Int {
-    var result = 0
+private fun List<CharArray>.numRolls(): Long {
+    var result = 0L
     iterateAndReturn { _, _ -> result += 1 }
     return result
 }
 
-private fun List<CharArray>.removeRolls(): Int {
-    var totalRemoved = 0
+private fun List<CharArray>.removeRolls(): Long {
+    var totalRemoved = 0L
     while (true) {
         var removed = 0
         iterateAndReturn { x, y ->

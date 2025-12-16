@@ -1,14 +1,33 @@
 package aoc.years.y2025
 
 import aoc.common.Day
+import aoc.common.Part
 import aoc.common.printResults
 
-class Day01 : Day(year = 2025, day = 1, test = 3 to 6) {
-    override fun part1(input: List<String>): Int {
+private val testInput = """
+    L68
+    L30
+    R48
+    L5
+    R60
+    L55
+    L1
+    L99
+    R14
+    L82
+""".trimIndent()
+
+class Day01 : Day(
+    year = 2025,
+    day = 1,
+    part1 = Part(test = 3L, testInput = testInput),
+    part2 = Part(test = 6L, testInput = testInput),
+) {
+    override fun part1(input: List<String>): Long {
         return input.turnDials()
     }
 
-    override fun part2(input: List<String>): Int {
+    override fun part2(input: List<String>): Long {
         return input.turnDials2()
     }
 }
@@ -18,8 +37,8 @@ fun main() {
 }
 
 
-private fun List<String>.turnDials(): Int {
-    var total = 0
+private fun List<String>.turnDials(): Long {
+    var total = 0L
     var current = 50
     for (line in this) {
         val clicks = line.substring(1).toInt() * line.directionToValue()
@@ -37,8 +56,8 @@ private fun String.directionToValue(): Int = when (this[0]) {
     else -> throw IllegalArgumentException("Invalid direction")
 }
 
-private fun List<String>.turnDials2(): Int {
-    var total = 0
+private fun List<String>.turnDials2(): Long {
+    var total = 0L
     var current = 50
     for (line in this) {
         val dist = line.substring(1).toInt()

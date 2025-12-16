@@ -1,10 +1,27 @@
 package aoc.years.y2025
 
 import aoc.common.Day
+import aoc.common.Part
 import aoc.common.printResults
 import kotlin.math.abs
 
-class Day09 : Day(year = 2025, day = 9, test = 50L to 24L) {
+private val testInput = """
+    7,1
+    11,1
+    11,7
+    9,7
+    9,5
+    2,5
+    2,3
+    7,3
+""".trimIndent()
+
+class Day09 : Day(
+    year = 2025,
+    day = 9,
+    part1 = Part(test = 50L, testInput = testInput),
+    part2 = Part(test = 24L, testInput = testInput),
+) {
     override fun part1(input: List<String>): Long {
         val seats = input.parseCoordinates()
         val max = seats.indices.flatMap { a ->
