@@ -117,11 +117,11 @@ abstract class Day(
         return null
     }
 
-    open fun part1(input: List<String>, limit: Int): Any = part1(if (limit > 0) input.take(limit) else input)
-    open fun part2(input: List<String>, limit: Int): Any = part2(if (limit > 0) input.take(limit) else input)
-
     open fun part1(input: List<String>): Any = -1L
     open fun part2(input: List<String>): Any = -1L
+
+    open fun part1(input: List<String>, limit: Int): Any = part1(if (limit > 0) input.take(limit) else input)
+    open fun part2(input: List<String>, limit: Int): Any = part2(if (limit > 0) input.take(limit) else input)
 }
 
 data class Result(
