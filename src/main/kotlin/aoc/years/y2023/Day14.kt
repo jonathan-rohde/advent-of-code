@@ -3,7 +3,6 @@ package aoc.years.y2023
 import aoc.common.Day
 import aoc.common.Part
 import aoc.common.printResults
-import kotlin.math.pow
 
 private val testInput = """
     O....#....
@@ -26,7 +25,7 @@ class Day14 : Day(
 ) {
     override fun part1(input: List<String>): Any {
         val pattern = input.parsePattern()
-        pattern.moveNorth()
+        pattern.move(MoveDirection.NORTH)
         return pattern.mapIndexed { index, types ->
             types.count { it == ObjectType.ROUND_ROCK } * (pattern.size - index)
         }.sum().toLong()
@@ -35,31 +34,38 @@ class Day14 : Day(
     override fun part2(input: List<String>): Any {
         val pattern = input.parsePattern()
         val cache = mutableSetOf<List<Pair<Int, Int>>>()
+        var lastRocks: List<Pair<Int, Int>> = emptyList()
+        val cycles = mutableMapOf<List<Pair<Int, Int>>, List<Pair<Int, Int>>>()
         repeat(1000000000) {
             val currentRocks = pattern.getRocks()
             if (cache.contains(currentRocks)) {
                 println("Cycle detected at iteration $it")
-                var cycleSize = 0
-                while(true) {
-                    cycleSize += 1
-                    pattern.cycle()
-                    if (pattern.getRocks().containsAll(currentRocks)) {
-                        break
-                    }
-                }
+                val cycleSize = cycles.getCycleSize(currentRocks)
                 repeat((1000000000 - it) % cycleSize) {
                     pattern.cycle()
                 }
                 return pattern.calcLoad()
             } else {
                 cache.add(pattern.getRocks())
-                it.takeIf { it % 1000000 == 0 }?.let {
-                    println("Patternsize: ${pattern.size} Iteration $it, ${1000000000 - it} remaining")
-                }
+                cycles[lastRocks] = currentRocks
                 pattern.cycle()
             }
+            lastRocks = currentRocks
         }
         return pattern.calcLoad()
+    }
+
+    private fun Map<List<Pair<Int, Int>>, List<Pair<Int, Int>>>.getCycleSize(start: List<Pair<Int, Int>>): Int {
+        var size = 0
+        var current = start
+        while (true) {
+            size += 1
+            current = this[current] ?: break
+            if (current == start) {
+                break
+            }
+        }
+        return size
     }
 
     private fun List<MutableList<ObjectType>>.getRocks(): List<Pair<Int, Int>> {
@@ -85,92 +91,50 @@ fun main() {
     Day14().execute().printResults()
 }
 
-private fun List<MutableList<ObjectType>>.moveNorth(): Boolean {
-    var moved = false
-    forEachIndexed { y, row ->
-        row.forEachIndexed { x, type ->
-            if (type == ObjectType.ROUND_ROCK) {
-                // search north for empty space
-                val ny = (y - 1 downTo 0).takeWhile { ty ->
-                    this[ty][x] == ObjectType.EMPTY
-                }.lastOrNull() ?: return@forEachIndexed
-                this[ny][x] = ObjectType.ROUND_ROCK
-                this[y][x] = ObjectType.EMPTY
-                moved = true
-            }
-        }
-    }
-    return moved
+private enum class MoveDirection {
+    NORTH,
+    SOUTH,
+    EAST,
+    WEST,
 }
 
-private fun List<MutableList<ObjectType>>.moveSouth(): Boolean {
-    var moved = false
-    indices.reversed().forEach { y ->
-        this[y].forEachIndexed { x, type ->
-            if (type == ObjectType.ROUND_ROCK) {
-                // search south for empty space
-                val ny = (y + 1 until size).takeWhile { ty ->
-                    this[ty][x] == ObjectType.EMPTY
-                }.lastOrNull() ?: return@forEachIndexed
-                this[ny][x] = ObjectType.ROUND_ROCK
-                this[y][x] = ObjectType.EMPTY
-                moved = true
-            }
-        }
+private fun List<MutableList<ObjectType>>.move(moveDirection: MoveDirection) {
+    val rowIndex = when (moveDirection) {
+        MoveDirection.SOUTH -> indices.reversed()
+        else -> indices
     }
-    return moved
-}
-
-private fun List<MutableList<ObjectType>>.moveWest(): Boolean {
-    var moved = false
-    forEachIndexed { y, row ->
-        row.forEachIndexed { x, type ->
-            if (type == ObjectType.ROUND_ROCK) {
-                // search west for empty space
-                val nx = (x - 1 downTo 0).takeWhile { tx ->
-                    this[y][tx] == ObjectType.EMPTY
-                }.lastOrNull()
-                if (nx == null) {
-                    // cannot move
-                    return@forEachIndexed
-                }
-                this[y][nx] = ObjectType.ROUND_ROCK
-                this[y][x] = ObjectType.EMPTY
-                moved = true
-            }
+    rowIndex.forEach { y ->
+        val colIndex = when (moveDirection) {
+            MoveDirection.EAST -> this[y].indices.reversed()
+            else -> this[y].indices
         }
-    }
-    return moved
-}
-
-private fun List<MutableList<ObjectType>>.moveEast(): Boolean {
-    var moved = false
-    forEachIndexed { y, row ->
-        row.indices.reversed().forEach { x ->
+        colIndex.forEach { x ->
             val type = this[y][x]
             if (type == ObjectType.ROUND_ROCK) {
-                // search east for empty space
-                val nx = (x + 1 until size).takeWhile { tx ->
-                    this[y][tx] == ObjectType.EMPTY
-                }.lastOrNull()
-                if (nx == null) {
-                    // cannot move
-                    return@forEach
+                val (nx, ny) = when (moveDirection) {
+                    MoveDirection.NORTH -> Pair(x, (y - 1 downTo 0).takeWhile { ty -> this[ty][x] == ObjectType.EMPTY }.lastOrNull())
+                    MoveDirection.SOUTH -> Pair(x, (y + 1 until size).takeWhile { ty -> this[ty][x] == ObjectType.EMPTY }.lastOrNull())
+                    MoveDirection.WEST -> Pair((x - 1 downTo 0).takeWhile { tx -> this[y][tx] == ObjectType.EMPTY }.lastOrNull(), y)
+                    MoveDirection.EAST -> Pair((x + 1 until size).takeWhile { tx -> this[y][tx] == ObjectType.EMPTY }.lastOrNull(), y)
                 }
-                this[y][nx] = ObjectType.ROUND_ROCK
-                this[y][x] = ObjectType.EMPTY
-                moved = true
+                if (nx != null && ny != null) {
+                    this[ny][nx] = ObjectType.ROUND_ROCK
+                    this[y][x] = ObjectType.EMPTY
+                }
             }
         }
     }
-    return moved
 }
 
 private fun Board.cycle() {
-    moveNorth()
-    moveWest()
-    moveSouth()
-    moveEast()
+    move(MoveDirection.NORTH)
+    move(MoveDirection.WEST)
+    move(MoveDirection.SOUTH)
+    move(MoveDirection.EAST)
+//    moveNorth()
+//    moveWest()
+//    moveSouth()
+//    moveEast()
 }
 
 private typealias Board = List<MutableList<ObjectType>>
