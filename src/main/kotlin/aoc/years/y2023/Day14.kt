@@ -34,50 +34,21 @@ class Day14 : Day(
 
     override fun part2(input: List<String>): Any {
         val pattern = input.parsePattern()
-//        println("Initial state:")
-//        pattern.print()
-////        repeat(3) {
-////            repeat(4) {
-//                pattern.moveNorth()
-//        println("After moving North:")
-//        pattern.print()
-//                pattern.moveWest()
-//        println("After moving West:")
-//        pattern.print()
-//                pattern.moveSouth()
-//        println("After moving South:")
-//        pattern.print()
-//                pattern.moveEast()
-//        println("After moving East:")
-////            }
-////            pattern.print()
-////        }
-//        pattern.print()
-
         val cache = mutableSetOf<List<Pair<Int, Int>>>()
-
-
         repeat(1000000000) {
             val currentRocks = pattern.getRocks()
             if (cache.contains(currentRocks)) {
                 println("Cycle detected at iteration $it")
                 var cycleSize = 0
-                while (true) {
-                    // calculate cycle size
+                while(true) {
                     cycleSize += 1
-                    pattern.moveNorth()
-                    pattern.moveWest()
-                    pattern.moveSouth()
-                    pattern.moveEast()
+                    pattern.cycle()
                     if (pattern.getRocks().containsAll(currentRocks)) {
                         break
                     }
                 }
                 repeat((1000000000 - it) % cycleSize) {
-                    pattern.moveNorth()
-                    pattern.moveWest()
-                    pattern.moveSouth()
-                    pattern.moveEast()
+                    pattern.cycle()
                 }
                 return pattern.calcLoad()
             } else {
@@ -85,10 +56,7 @@ class Day14 : Day(
                 it.takeIf { it % 1000000 == 0 }?.let {
                     println("Patternsize: ${pattern.size} Iteration $it, ${1000000000 - it} remaining")
                 }
-                pattern.moveNorth()
-                pattern.moveWest()
-                pattern.moveSouth()
-                pattern.moveEast()
+                pattern.cycle()
             }
         }
         return pattern.calcLoad()
@@ -106,61 +74,15 @@ class Day14 : Day(
         return rocks
     }
 
-    private fun List<MutableList<ObjectType>>.sameAs(other: List<MutableList<ObjectType>>): Boolean {
-        indices.forEach { y ->
-            this[0].indices.forEach { x ->
-                if (this[y][x] != other[y][x]) return false
-            }
-        }
-        return true
-    }
-
     private fun List<MutableList<ObjectType>>.calcLoad(): Long {
         return mapIndexed { index, types ->
             types.count { it == ObjectType.ROUND_ROCK } * (size - index)
         }.sum().toLong()
     }
-
-    private fun execute(input: List<String>, action: (List<MutableList<ObjectType>>) -> Unit): Long {
-        val pattern = input.parsePattern()
-        action(pattern)
-        return pattern.mapIndexed { index, types ->
-            types.count { it == ObjectType.ROUND_ROCK } * (pattern.size - index)
-        }.sum().toLong()
-    }
-}
-
-private fun List<MutableList<ObjectType>>.print() {
-
-    forEach { row ->
-        println(row.joinToString("") {
-            when (it) {
-                ObjectType.EMPTY -> "."
-                ObjectType.CUBE_ROCK -> "#"
-                ObjectType.ROUND_ROCK -> "O"
-            }
-        })
-    }
-
-    println("-----------------------")
 }
 
 fun main() {
     Day14().execute().printResults()
-}
-
-private fun List<MutableList<ObjectType>>.rotate90() {
-    val newGrid = List(size) { MutableList(size) { ObjectType.EMPTY } }
-    forEachIndexed { y, row ->
-        row.forEachIndexed { x, type ->
-            newGrid[x][size - 1 - y] = type
-        }
-    }
-    for (y in indices) {
-        for (x in this[y].indices) {
-            this[y][x] = newGrid[y][x]
-        }
-    }
 }
 
 private fun List<MutableList<ObjectType>>.moveNorth(): Boolean {
@@ -244,6 +166,14 @@ private fun List<MutableList<ObjectType>>.moveEast(): Boolean {
     return moved
 }
 
+private fun Board.cycle() {
+    moveNorth()
+    moveWest()
+    moveSouth()
+    moveEast()
+}
+
+private typealias Board = List<MutableList<ObjectType>>
 private enum class ObjectType {
     EMPTY,
     CUBE_ROCK,
