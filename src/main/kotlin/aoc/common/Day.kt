@@ -143,22 +143,22 @@ data class PartResult(
 )
 
 fun Result.printResults() {
-    val testPart1 = if (test1Result != null) {
+    val testPart1Text = if (test1Result != null) {
         "${testPart1?.second} $test1Result"
     } else {
         "${testPart1?.second}"
     }
-    val testPart2 = if (test2Result != null) {
+    val testPart2Text = if (test2Result != null) {
         "${testPart2?.second} $test2Result"
     } else {
         "${testPart2?.second}"
     }
     println("""
         -------- Results --------
-        Test Part 1: $testPart1
-        Test Part 2: $testPart2
+        Test Part 1: $testPart1Text (${testPart1?.first})
+        Test Part 2: $testPart2Text (${testPart2?.first})
         
-        Part 1: ${part1.second}
-        Part 2: ${part2.second}
+        Part 1: ${part1.second} (${part1.first})
+        Part 2: ${part2.second} (${part2.first})
     """.trimIndent())
 }
