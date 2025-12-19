@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="2024" type="JetRunConfigurationType">
+    <option name="MAIN_CLASS_NAME" value="aoc.MainKt" />
+    <module name="advent-of-code.main" />
+    <option name="PROGRAM_PARAMETERS" value="--show-results --year 2024" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
