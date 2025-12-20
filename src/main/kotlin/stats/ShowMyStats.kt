@@ -2,20 +2,20 @@ package stats
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import stats.downloader.statsDataProvider
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
+import java.time.Month
 import java.time.ZoneId
 import java.time.ZoneOffset
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.io.path.Path
 import kotlin.io.path.readText
 
 @Serializable
 private data class Stats(
-    val event: Int,
+    val event: Int?,
     val members: Map<Int, Member>
 )
 
@@ -34,31 +34,43 @@ private typealias DayLevel = Map<Int, StarCompletion>
 @Serializable
 private data class StarCompletion(
     val get_star_ts: Long,
-    val star_index: Int
+    val star_index: Int?
 )
 
 private val json = Json { ignoreUnknownKeys = true }
 
 fun main() {
-    val jsonData = readLineFromFile("src/main/resources/stats/2023.json")
-    val obj = json.decodeFromString<Stats>(jsonData)
-    obj.members.entries.first {
-        it.value.name == "jonathan-rohde"
-    }.let {
-        println("Member: ${it.value.name}, Stars: ${it.value.stars}")
-        it.value.completion_day_level.entries.sortedBy { it.key }.forEach { dayEntry ->
-            val day = dayEntry.key
-            val stars = dayEntry.value.entries.sortedBy { it.key }.joinToString("; ") { starEntry ->
-                val ts = starEntry.value.get_star_ts.toZonedDateTime()
-                "Star ${starEntry.key} at $ts"
+    val localDate = LocalDate.now()
+    val earliest = 2015
+    val latest = if (localDate.month == Month.DECEMBER) {
+        localDate.year
+    } else {
+        localDate.year - 1
+    }
+
+    (earliest..latest).forEach { year ->
+        println("$year")
+        val jsonData = statsDataProvider.getStatsData(year)
+        val obj = json.decodeFromString<Stats>(jsonData)
+        obj.members.entries.first {
+            it.value.name == "jonathan-rohde"
+        }.let { json ->
+            println("Member: ${json.value.name}, Stars: ${json.value.stars}")
+            json.value.completion_day_level.entries.sortedBy { it.key }.forEach { dayEntry ->
+                val day = dayEntry.key
+                val stars = dayEntry.value.entries.sortedBy { it.key }.joinToString("; ") { starEntry ->
+                    val ts = starEntry.value.get_star_ts.toZonedDateTime()
+                    "Star ${starEntry.key} at $ts"
+                }
+                val timeBetween = dayEntry.value.entries.sortedBy { it.key }.let {
+                    val duration = it.last().value.get_star_ts - it.first().value.get_star_ts
+                    " (Time between: ${Duration.ofSeconds(duration).toFormattedString()})"
+                }
+                println(" Day $day: $stars $timeBetween")
             }
-            val timeBetween = dayEntry.value.entries.sortedBy { it.key }.let {
-                val duration = it.last().value.get_star_ts - it.first().value.get_star_ts
-                " (Time between: ${Duration.ofSeconds(duration).toFormattedString()})"
-            }
-            println(" Day $day: $stars $timeBetween")
         }
     }
+
 }
 
 private fun Long.toZonedDateTime(): String {
