@@ -3,6 +3,7 @@ package aoc.years.y2023
 import aoc.common.Day
 import aoc.common.Part
 import aoc.common.printResults
+import utils.gaussArea
 import kotlin.math.abs
 
 private val testInput = """
@@ -79,18 +80,19 @@ private fun List<String>.mapToPath(parser: String.(SnowHole) -> SnowHole): List<
     return path
 }
 
-private fun List<SnowHole>.area(): Long {
-    var sum1 = 0L
-    var sum2 = 0L
-
-    windowed(2).map {it[0] to it[1]}.forEach { (a, b) ->
-        sum1 += a.first * b.second
-        sum2 += a.second * b.first
-    }
-
-    val edge = windowed(2).map {it[0] to it[1]}.sumOf { (a, b) ->
-        abs(a.first - b.first) + abs(a.second - b.second)
-    } / 2 + 1
-
-    return (abs(sum1 - sum2) / 2) + edge
+private fun List<Pair<Long, Long>>.area(): Long {
+    return gaussArea(includeEdge = true)
+//    var sum1 = 0L
+//    var sum2 = 0L
+//
+//    windowed(2).map {it[0] to it[1]}.forEach { (a, b) ->
+//        sum1 += a.first * b.second
+//        sum2 += a.second * b.first
+//    }
+//
+//    val edge = windowed(2).map {it[0] to it[1]}.sumOf { (a, b) ->
+//        abs(a.first - b.first) + abs(a.second - b.second)
+//    } / 2 + 1
+//
+//    return (abs(sum1 - sum2) / 2) + edge
 }

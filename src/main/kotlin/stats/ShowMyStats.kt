@@ -40,7 +40,7 @@ private data class StarCompletion(
 private val json = Json { ignoreUnknownKeys = true }
 
 fun main() {
-    val jsonData = readLineFromFile("src/main/resources/stats/2025.json")
+    val jsonData = readLineFromFile("src/main/resources/stats/2023.json")
     val obj = json.decodeFromString<Stats>(jsonData)
     obj.members.entries.first {
         it.value.name == "jonathan-rohde"

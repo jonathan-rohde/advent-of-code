@@ -1,17 +1,48 @@
 package aoc.years.y2023
 
 import aoc.common.Day
+import aoc.common.Part
 import aoc.common.printResults
+import utils.gaussArea
 import java.util.*
 
-class Day10 : Day(year = 2023, day = 10, test = 8 to null) {
+private val testInput = """
+    ...........
+    .S-------7.
+    .|F-----7|.
+    .||.....||.
+    .||.....||.
+    .|L-7.F-J|.
+    .|..|.|..|.
+    .L--J.L--J.
+    ...........
+""".trimIndent()
+
+class Day10 : Day(
+    year = 2023,
+    day = 10,
+    part1 = Part(test = 8, testInput = testInput),
+    part2 = Part(test = 10, testInput = testInput)
+) {
     override fun part1(input: List<String>): Any {
         val start = input.find("S")!!
         return input.findFarthest(start).first
     }
 
     override fun part2(input: List<String>): Any {
-        return -1
+        val start = input.find("S")!!
+        val path = input.findFarthest(start).second.map { it.first.toLong() to it.second.toLong() }
+        input.indices.forEach { y ->
+            input[y].indices.forEach { x ->
+                if (path.contains(x.toLong() to y.toLong())) {
+                    print("#")
+                } else {
+                    print(".")
+                }
+            }
+            println()
+        }
+        return path.gaussArea(includeEdge = false)
     }
 
 }
@@ -85,7 +116,7 @@ private fun List<String>.findFarthest(pos: Pair<Int, Int>): Pair<Int, List<Pair<
                 'F' -> filterValidNeighbours(listOf(x2 to y2 + 1, x2 + 1 to y2))
                 else -> continue
             }
-            neighbors.forEach { queue.add(Triple(it, Pair(traveled + 1, direction), path + pos)) }
+            neighbors.forEach { queue.add(Triple(it, Pair(traveled + 1, direction), path + currentPos)) }
         }
     }
     return furthest.copy(
