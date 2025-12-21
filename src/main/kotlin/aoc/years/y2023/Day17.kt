@@ -25,13 +25,14 @@ class Day17 : Day(
     year = 2023,
     day = 17,
     part1 = Part(test = 102, testInput = testInput),
-    part2 = Part(test = 51, testInput = testInput),
+    part2 = Part(test = 94, testInput = testInput),
 ) {
     override fun part1(input: List<String>): Any {
-        val grid = input.parseGrid()
-        val distances = grid.shortestPath(0, 0)
+        return input.parseGrid().shortestPath(0, 0)
+    }
 
-        return distances[grid[0].lastIndex to grid.lastIndex] ?: -1
+    override fun part2(input: List<String>): Any {
+        return input.parseGrid().shortestPath(0, 0, min = 4, max = 10)
     }
 }
 
@@ -51,57 +52,64 @@ private enum class MapDirection {
 
 private typealias Coord = Pair<Int, Int>
 
-private fun List<List<Int>>.shortestPath(startX: Int, startY: Int): Map<Pair<Int, Int>, Int> {
-    val distances = mutableMapOf<Pair<Int, Int>, Int>().withDefault { Int.MAX_VALUE }
-    val priorityQueue = PriorityQueue<Triple<Coord, Int, List<MapDirection>>>(compareBy { it.second })
-    val visited = mutableSetOf<Triple<Coord, Int, List<MapDirection>>>()
+private fun List<List<Int>>.shortestPath(x: Int, y: Int, min: Int = 0, max: Int = 3): Int {
+    val target = Coord(this[0].lastIndex, this.lastIndex)
+    val queue = PriorityQueue<Triple<Coord, Pair<MapDirection, Int>, Int>>(compareBy { it.third })
+    val visited = mutableMapOf<Triple<Coord, MapDirection, Int>, Int>().withDefault { Int.MAX_VALUE }
 
-    priorityQueue.add(Triple(Coord(startX, startY), 0, listOf()))
-    distances[Coord(startX, startY)] = 0
+    queue.add(Triple(Coord(x+1, y), Pair(MapDirection.EAST, 1), 0))
+    queue.add(Triple(Coord(x, y+1), Pair(MapDirection.SOUTH, 1), 0))
 
-    while (priorityQueue.isNotEmpty()) {
-        val (node, currentDist, directions) = priorityQueue.poll()
-        val (x, y) = node
-        if (visited.add(Triple(node, currentDist, directions.takeLast(3)))) {
-            val neighbours = getNeighbours(x, y, directions.lastOrNull())
+    while (queue.isNotEmpty()) {
+        val (node, move, heat) = queue.poll()
+        val (walkDirection, straights) = move
+        val (nx, ny) = node
 
-            val filteredNeighbours = neighbours.filter { (_, _, direction) ->
-                directions.takeLastWhile { it == direction }.size < 3
-            }
-            filteredNeighbours.forEach { (coord, distance, direction) ->
-                val totalDist = currentDist + distance
-                if (totalDist <= distances.getValue(coord)) {
-                    distances[coord] = totalDist
-                    val list = (directions + direction)
-                    priorityQueue.add(Triple(coord, totalDist, list))
-                }
-            }
+        val totalHeat = heat + this[node.second][node.first]
+        if (node == target && straights >= min) return totalHeat
+
+        val check = Triple(node, walkDirection, straights)
+        if (visited.getValue(check) > totalHeat) {
+            visited[check] = totalHeat
+
+            getNeighbours(nx, ny, walkDirection, straights, min, max)
+                .forEach { (next, walk, line) ->  queue.add(Triple(next, Pair(walk, line), totalHeat))}
         }
     }
-    return distances
+
+    return 0
 }
 
-private fun List<List<Int>>.getNeighbours(x: Int, y: Int, origin: MapDirection?): List<Triple<Coord, Int, MapDirection>> {
-    val candidates = listOf(
-        Pair(x, y - 1) to MapDirection.NORTH,
-        Pair(x + 1, y) to MapDirection.EAST,
-        Pair(x, y + 1) to MapDirection.SOUTH,
-        Pair(x - 1, y) to MapDirection.WEST,
-    )
-    val exclude180 = candidates.filter { (_, direction) ->
-            when (origin) {
-                MapDirection.NORTH -> direction != MapDirection.SOUTH
-                MapDirection.SOUTH -> direction != MapDirection.NORTH
-                MapDirection.EAST -> direction != MapDirection.WEST
-                MapDirection.WEST -> direction != MapDirection.EAST
-                else -> true
-            }
-        }
-    val excludeOutside = exclude180.filter { (coord, _) -> coord.second in this.indices && coord.first in this[coord.second].indices }
+private fun List<List<Int>>.getNeighbours(x: Int, y: Int, origin: MapDirection, straights: Int, min: Int, max: Int): List<Triple<Coord, MapDirection, Int>> {
+    val result = mutableListOf<Triple<Coord, MapDirection, Int>>()
+    if (straights >= min) {
+        result.add(turnLeft(x, y, origin).let { Triple(it.first, it.second, 1)})
+        result.add(turnRight(x, y, origin).let { Triple(it.first, it.second, 1)})
+    }
+    if (straights < max) {
+        result.add(straight(x, y, origin).let { Triple(it.first, it.second, straights + 1)})
+    }
 
-    val result = excludeOutside.map { (coord, direction) ->
-            val (x, y) = coord
-            Triple(coord, this[y][x], direction)
-        }
-    return result
+    return result.filter { (coord, _) -> coord.first in this[0].indices && coord.second in this.indices }
+}
+
+private fun turnLeft(x: Int, y: Int, origin: MapDirection) = when (origin) {
+    MapDirection.NORTH -> Pair(Coord(x - 1, y), MapDirection.WEST)
+    MapDirection.SOUTH -> Pair(Coord(x + 1, y), MapDirection.EAST)
+    MapDirection.EAST -> Pair(Coord(x, y - 1), MapDirection.NORTH)
+    MapDirection.WEST -> Pair(Coord(x, y + 1), MapDirection.SOUTH)
+}
+
+private fun turnRight(x: Int, y: Int, origin: MapDirection) = when (origin) {
+    MapDirection.NORTH -> Pair(Coord(x + 1, y), MapDirection.EAST)
+    MapDirection.SOUTH -> Pair(Coord(x - 1, y), MapDirection.WEST)
+    MapDirection.EAST -> Pair(Coord(x, y + 1), MapDirection.SOUTH)
+    MapDirection.WEST -> Pair(Coord(x, y - 1), MapDirection.NORTH)
+}
+
+private fun straight(x: Int, y: Int, origin: MapDirection) = when (origin) {
+    MapDirection.NORTH -> Pair(Coord(x, y - 1), MapDirection.NORTH)
+    MapDirection.SOUTH -> Pair(Coord(x, y + 1), MapDirection.SOUTH)
+    MapDirection.EAST -> Pair(Coord(x + 1, y), MapDirection.EAST)
+    MapDirection.WEST -> Pair(Coord(x - 1, y), MapDirection.WEST)
 }
