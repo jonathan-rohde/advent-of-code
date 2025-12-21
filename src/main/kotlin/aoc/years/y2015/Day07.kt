@@ -3,7 +3,6 @@ package aoc.years.y2015
 import aoc.common.Day
 import aoc.common.Part
 import aoc.common.printResults
-import aoc.years.y2024.cache
 
 fun main() {
     Day07().execute().printResults()
@@ -35,24 +34,29 @@ private fun String.parseLine(): Pair<String, String> {
 
 private fun Map<String, String>.followPath(start: String, pathCache: MutableMap<String, Int> = mutableMapOf()): Int {
     return pathCache.getOrPut(start) {
-        val rule = this[start]!!
-        return@getOrPut rule.digitOr {
+        this[start]!!.digitOr {
             when {
-                rule.matches("[a-z]+".toRegex()) -> followPath(rule, pathCache)
-                rule.contains("NOT") -> rule.removePrefix("NOT ").digitOr { followPath(it, pathCache) }.inv()
-                else -> {
-                    val a = rule.takeWhile { it != ' ' }.digitOr { followPath(it, pathCache) }
-                    val b = rule.takeLastWhile { it != ' ' }.digitOr { followPath(it, pathCache) }
-                    when {
-                        rule.contains("AND") -> a and b
-                        rule.contains("OR") -> a or b
-                        rule.contains("RSHIFT") -> a shr b
-                        rule.contains("LSHIFT") -> a shl b
-                        else -> throw IllegalArgumentException("Unknown rule: $rule")
-                    }
-                }
+                this[start]!!.matches("[a-z]+".toRegex()) -> followPath(this[start]!!, pathCache)
+                this[start]!!.contains("NOT") -> this[start]!!.removePrefix("NOT ")
+                    .digitOr { followPath(it, pathCache) }.inv()
+                else -> binaryOperation(start, pathCache)
             }
         }
+    }
+}
+
+private fun Map<String, String>.binaryOperation(
+    start: String,
+    pathCache: MutableMap<String, Int>
+): Int {
+    val a = this[start]!!.takeWhile { it != ' ' }.digitOr { followPath(it, pathCache) }
+    val b = this[start]!!.takeLastWhile { it != ' ' }.digitOr { followPath(it, pathCache) }
+    return when {
+        this[start]!!.contains("AND") -> a and b
+        this[start]!!.contains("OR") -> a or b
+        this[start]!!.contains("RSHIFT") -> a shr b
+        this[start]!!.contains("LSHIFT") -> a shl b
+        else -> throw IllegalArgumentException("Unknown rule: ${this[start]!!}")
     }
 }
 
