@@ -25,12 +25,12 @@ class Day10 : Day(
         }.last().second.length.also { println(it) }
     }
 
-//    override fun part2(input: List<String>): Any {
-//        return generateSequence(0 to input[0]) {
-//            if (it.first == 50) null
-//            else it.first + 1 to it.second.lookAndSay()
-//        }.last().second.length.also { println(it) }
-//    }
+    override fun part2(input: List<String>): Any {
+        return generateSequence(0 to input[0]) {
+            if (it.first == 50) null
+            else it.first + 1 to it.second.lookAndSay()
+        }.last().second.length.also { println(it) }
+    }
 }
 
 private fun String.lookAndSay(): String {
