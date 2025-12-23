@@ -2,10 +2,17 @@ package stats.downloader
 
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.Month
+import java.time.OffsetDateTime
+import java.time.OffsetTime
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createFile
+import kotlin.io.path.deleteExisting
 import kotlin.io.path.exists
+import kotlin.io.path.getLastModifiedTime
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
@@ -21,6 +28,14 @@ internal val httpClient = OkHttpClient.Builder()
 internal val statsDataDownloader = StatsDataDownloader(httpClient)
 internal val statsDataProvider = StatsDataProvider(statsDataDownloader)
 
+internal val earliestYear = 2015
+internal val latestYear = LocalDate.now().let {
+    if (it.month == Month.DECEMBER) {
+        it.year
+    } else {
+        it.year - 1
+    }
+}
 
 class StatsDataProvider(
     private val statsDataDownloader: StatsDataDownloader
@@ -33,7 +48,14 @@ class StatsDataProvider(
         }
         val cacheFile = Path("$cacheDir/$year.json")
         if (cacheFile.exists()) {
-            return cacheFile.readText().trim()
+            // check age
+            val age = cacheFile.getLastModifiedTime()
+            val distance = latestYear - year
+            val useCache = age.toMillis() > cachableDate(distance)
+            if (useCache) {
+                return cacheFile.readText().trim()
+            }
+            cacheFile.deleteExisting()
         }
 
         val inputData = statsDataDownloader.downloadStatsData(year)
@@ -41,6 +63,10 @@ class StatsDataProvider(
         cacheFile.writeText(inputData)
         return inputData
     }
+
+    private fun cachableDate(distance: Int): Long =
+        OffsetDateTime.now().withMinute(0).withSecond(0).withNano(0).minusMonths(distance.toLong())
+            .toEpochSecond() * 1000
 }
 
 class StatsDataDownloader(private val httpClient: OkHttpClient) {

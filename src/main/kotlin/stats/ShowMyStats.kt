@@ -2,6 +2,8 @@ package stats
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import stats.downloader.earliestYear
+import stats.downloader.latestYear
 import stats.downloader.statsDataProvider
 import java.time.Duration
 import java.time.LocalDate
@@ -40,15 +42,7 @@ private data class StarCompletion(
 private val json = Json { ignoreUnknownKeys = true }
 
 fun main() {
-    val localDate = LocalDate.now()
-    val earliest = 2015
-    val latest = if (localDate.month == Month.DECEMBER) {
-        localDate.year
-    } else {
-        localDate.year - 1
-    }
-
-    (earliest..latest).forEach { year ->
+    (earliestYear..latestYear).forEach { year ->
         println("$year")
         val jsonData = statsDataProvider.getStatsData(year)
         val obj = json.decodeFromString<Stats>(jsonData)
