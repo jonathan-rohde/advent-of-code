@@ -9,7 +9,7 @@ fun String.parseJson(): Any {
         val typeRef = object : TypeReference<Map<String, Any>>() {}
         return ObjectMapper().readValue(this, typeRef)
     } else {
-        val typeRef = object : TypeReference<Array<Any>>() {}
+        val typeRef = object : TypeReference<ArrayList<Any>>() {}
         return ObjectMapper().readValue(this, typeRef)
     }
 }

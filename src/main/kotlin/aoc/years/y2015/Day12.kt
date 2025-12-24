@@ -23,8 +23,8 @@ private val testInput = """
 class Day12 : Day(
     year = 2015,
     day = 12,
-    part1 = Part(test = 26, testInput = testInput),
-    part2 = Part(test = 22, testInput = testInput),
+    part1 = Part(test = 26L, testInput = testInput),
+    part2 = Part(test = 22L, testInput = testInput),
 ) {
     override fun part1(input: List<String>): Any {
         val result = input.map {
@@ -43,7 +43,7 @@ class Day12 : Day(
 
 private fun String.countNumbers(excludeRed: Boolean = false): Long {
     return when(val result = parseJson()) {
-        is Array<*> -> result.countNumbers(excludeRed)
+        is ArrayList<*> -> result.countNumbers(excludeRed)
         is Map<*, *> -> result.countNumbers(excludeRed)
         else -> 0L
     }
@@ -56,22 +56,8 @@ private fun Map<*, *>.countNumbers(excludeRed: Boolean = false): Long {
             is Number -> v.toLong()
             is String -> 0L
             is Map<*, *> -> v.countNumbers(excludeRed)
-            is Array<*> -> v.countNumbers(excludeRed)
             is ArrayList<*> -> v.countNumbers(excludeRed)
             else -> throw IllegalArgumentException("unknown type: $v")
-        }
-    }
-}
-
-private fun Array<*>.countNumbers(excludeRed: Boolean = false): Long {
-    return sumOf { v ->
-        when (v) {
-            is Number -> v.toLong()
-            is String -> 0L
-            is Map<*, *> -> v.countNumbers(excludeRed)
-            is Array<*> -> v.countNumbers(excludeRed)
-            is ArrayList<*> -> v.countNumbers(excludeRed)
-            else -> throw IllegalArgumentException("unknown type: ${v?.javaClass}")
         }
     }
 }
@@ -82,7 +68,6 @@ private fun ArrayList<*>.countNumbers(excludeRed: Boolean = false): Long {
             is Number -> v.toLong()
             is String -> 0L
             is Map<*, *> -> v.countNumbers(excludeRed)
-            is Array<*> -> v.countNumbers(excludeRed)
             is ArrayList<*> -> v.countNumbers(excludeRed)
             else -> throw IllegalArgumentException("unknown type: ${v?.javaClass}")
         }
