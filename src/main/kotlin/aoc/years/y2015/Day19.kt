@@ -36,7 +36,7 @@ class Day19 : Day(
                 r.flatMap { (key, values) -> values.map { key to it } } to t
             }
 
-        return (1..25).minOf {
+        return (1..5).minOf {
             executePart2(text, replacement)
         }
     }
@@ -49,7 +49,7 @@ private fun executePart2(text: String, replacement: List<Pair<String, String>>):
         var hadChange = false
         replacement.shuffled().forEach { (key, value) ->
             if (current.contains(value)) {
-                val index = current.lastIndexOf(value)
+                val index = current.indexOf(value)
                 current = current.replace(index, index + value.length, key)
                 steps++
                 hadChange = true
