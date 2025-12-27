@@ -3,6 +3,7 @@ package aoc.years.y2015
 import aoc.common.Day
 import aoc.common.Part
 import aoc.common.printResults
+import kotlin.collections.shuffled
 
 fun main() {
     Day19().execute().printResults()
@@ -28,6 +29,39 @@ class Day19 : Day(
         val (replacement, text) = input.parseReplacements()
         return combinationsOf(text, replacement).size
     }
+
+    override fun part2(input: List<String>): Any {
+        val (replacement, text) = input.parseReplacements()
+            .let { (r, t) ->
+                r.flatMap { (key, values) -> values.map { key to it } } to t
+            }
+
+        return (1..25).minOf {
+            executePart2(text, replacement)
+        }
+    }
+}
+
+private fun executePart2(text: String, replacement: List<Pair<String, String>>): Int {
+    var current = text
+    var steps = 0
+    while (current != "e") {
+        var hadChange = false
+        replacement.shuffled().forEach { (key, value) ->
+            if (current.contains(value)) {
+                val index = current.lastIndexOf(value)
+                current = current.replace(index, index + value.length, key)
+                steps++
+                hadChange = true
+            }
+        }
+        if (!hadChange) {
+            // start over :/
+            current = text
+        }
+    }
+
+    return steps
 }
 
 private fun List<String>.parseReplacements(): Pair<Map<String, List<String>>, String> {
@@ -58,4 +92,10 @@ private fun String.replaceAll(from: Int, to: Int, replace: List<String>): Set<St
     return replace.mapTo(mutableSetOf()) {
         "$prefix$it$suffix"
     }
+}
+
+private fun String.replace(from: Int, to: Int, replace: String): String {
+    val prefix = take(from)
+    val suffix = drop(to)
+    return "$prefix$replace$suffix"
 }
