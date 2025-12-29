@@ -45,7 +45,6 @@ private fun generateCodes(searchCoord: Pair<Int, Int>): Long {
         currentCoord = currentCoord.next()
     }
 
-    println("reached $searchCoord: $currentCoord")
     return currentCode
 }
 
