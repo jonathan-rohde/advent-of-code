@@ -18,7 +18,7 @@ private val testInput = """
 class Day21 : Day(
     year = 2015,
     day = 21,
-    part1 = Part(test = 0, testInput = testInput),
+    part1 = Part(test = null, testInput = testInput),
     part2 = Part(test = null, testInput = testInput),
 ) {
 

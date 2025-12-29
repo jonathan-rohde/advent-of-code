@@ -18,7 +18,7 @@ class Day15 : Day(
     year = 2015,
     day = 15,
     part1 = Part(test = 62842880L, testInput = testInput),
-    part2 = Part(test = 57600000, testInput = testInput),
+    part2 = Part(test = 57600000L, testInput = testInput),
 ) {
 
     override fun part1(input: List<String>): Any {

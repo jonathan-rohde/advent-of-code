@@ -24,8 +24,8 @@ private val testInput = """
 class Day24 : Day(
     year = 2015,
     day = 24,
-    part1 = Part(test = 99, testInput = testInput),
-    part2 = Part(test = 44, testInput = testInput),
+    part1 = Part(test = 99L, testInput = testInput),
+    part2 = Part(test = 44L, testInput = testInput),
 ) {
     override fun part1(input: List<String>): Any {
         val weights = input.toWeights()

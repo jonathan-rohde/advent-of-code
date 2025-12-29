@@ -16,18 +16,18 @@ private val testInput = """
 class Day14 : Day(
     year = 2015,
     day = 14,
-    part1 = Part(test = 1120, testInput = testInput),
-    part2 = Part(test = 286, testInput = testInput),
+    part1 = Part(test = 1120L, testInput = testInput, testLimit = 1000, limit = 2503),
+    part2 = Part(test = 689, testInput = testInput, testLimit = 1000, limit = 2503),
 ) {
 
-    override fun part1(input: List<String>): Any {
-        return input.map { it.toReindeer() }.maxOf { it.distanceAfter(2503) }
+    override fun part1(input: List<String>, limit: Int): Any {
+        return input.map { it.toReindeer() }.maxOf { it.distanceAfter(limit) }
     }
 
-    override fun part2(input: List<String>): Any {
+    override fun part2(input: List<String>, limit: Int): Any {
         val reindeers = input.map { it.toReindeer() }
         val scores = reindeers.associateWith { 0 }.toMutableMap()
-        (1..2503).forEach { i ->
+        (1..limit).forEach { i ->
             val standing = reindeers.map { it to it.distanceAfter(i) }.sortedByDescending { it.second }
             val winningScore = standing.first().second
             val winners = standing.takeWhile { it.second == winningScore }
@@ -41,13 +41,13 @@ class Day14 : Day(
 }
 
 private data class Reindeer(val name: String, val speed: Int, val duration: Int, val pause: Int) {
-    fun distanceAfter(seconds: Int): Int {
+    fun distanceAfter(seconds: Int): Long {
         val segment = duration + pause
         val distancePerSegment = duration * speed
         val amountSegments = seconds / segment
         val remain = seconds % segment
         val portion = if (duration <= remain) duration * speed else remain * speed
-        return amountSegments * distancePerSegment + portion
+        return amountSegments.toLong() * distancePerSegment + portion
     }
 }
 
