@@ -8,7 +8,7 @@ fun main() {
     Day02().execute().printResults()
 }
 
-val testInput = """
+private val testInput = """
     ULL
     RRDDD
     LURDL
