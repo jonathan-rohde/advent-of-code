@@ -60,7 +60,7 @@ fun main() {
                     val duration = it.last().value.get_star_ts - it.first().value.get_star_ts
                     " (Time between: ${Duration.ofSeconds(duration).toFormattedString()})"
                 }
-                println(" Day $day: $stars $timeBetween")
+                println(" Day ${day.toString().padStart(2, '0')}: $stars $timeBetween")
             }
         }
     }
