@@ -60,7 +60,7 @@ private fun RoomName.isValid(): Boolean {
     return third == checksum
 }
 
-val alphabet = "abcdefghijklmnopqrstuvwxyz"
+private val alphabet = "abcdefghijklmnopqrstuvwxyz"
 private fun RoomName.decipher(): RoomName {
     val name = first.map {
         alphabet[(alphabet.indexOf(it) + second) % alphabet.length]
