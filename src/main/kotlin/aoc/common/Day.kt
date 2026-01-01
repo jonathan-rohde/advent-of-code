@@ -2,7 +2,9 @@ package aoc.common
 
 import aoc.common.downloader.inputDataProvider
 import kotlin.time.Duration
+import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
+import kotlin.time.toDuration
 
 data class Part(
     val test: Any? = null,
@@ -27,17 +29,24 @@ abstract class Day(
 ) {
 
     fun execute(): Result {
-        val hasTests = part1?.test != null || part2?.test != null
-        val (testResults, test1Result, test2Result) = if (hasTests) {
-            val testInput = part1!!.testInput.trim().lines()
-            val testInput2 = part2!!.testInput.trim().lines()
-            val testResults = executePart(testInput, part1.test != null, part1, ::part1) to executePart(testInput2, part2.test != null, part2, ::part2)
-            val test1Result = testResults.showTestResult(1)
-            val test2Result = testResults.showTestResult(2)
-            Triple(testResults, test1Result, test2Result)
-        } else {
-            Triple(null, null, null)
-        }
+        val hasTestsPart1 = part1?.test != null
+        val hasTestsPart2 = part2?.test != null
+
+        val test1Execution = if (hasTestsPart1) {
+            val testInput = part1.testInput.trim().lines()
+            executePart(testInput, true, part1, ::part1).also {
+
+            }
+        } else Pair(Pair(5.toDuration(DurationUnit.NANOSECONDS), "none"), "none")
+
+        val test2Execution = if (hasTestsPart2) {
+            val testInput = part2.testInput.trim().lines()
+            executePart(testInput, true, part2, ::part2)
+        } else Pair(Pair(0.toDuration(DurationUnit.MILLISECONDS), "none"), "none")
+
+        val testResults = test1Execution to test2Execution
+        val test1Result = testResults.showTestResult(1)
+        val test2Result = testResults.showTestResult(2)
 
         val nonNullpart1 = part1 ?: Part(test = test?.first, testInput = "")
         val nonNullPart2 = part2 ?: Part(test = test?.second, testInput = "")
@@ -55,9 +64,9 @@ abstract class Day(
 
 
         return Result(
-            testPart1 = testResults?.first?.first,
+            testPart1 = testResults.first.first,
             test1Result = test1Result,
-            testPart2 = testResults?.second?.first,
+            testPart2 = testResults.second.first,
             test2Result = test2Result,
             part1 = part1.first,
             part2 = part2.first
