@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "deny": [
+      "Edit",
+      "Write",
+      "NotebookEdit",
+      "Bash(git commit:*)",
+      "Bash(git add:*)",
+      "Bash(git apply:*)",
+      "Bash(git checkout:*)",
+      "Bash(git restore:*)",
+      "Bash(git reset:*)",
+      "Bash(git stash:*)",
+      "Bash(git push:*)",
+      "Bash(git rm:*)",
+      "Bash(git mv:*)",
+      "Bash(rm:*)",
+      "Bash(mv:*)",
+      "Bash(cp:*)",
+      "Bash(touch:*)",
+      "Bash(sed -i:*)",
+      "Bash(perl -i:*)",
+      "Bash(tee:*)",
+      "Bash(./src/main/kotlin/template/create_day.sh:*)"
+    ]
+  }
+}
