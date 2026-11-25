@@ -2,6 +2,15 @@ package aoc.common
 
 import kotlin.time.measureTime
 
+object RunStatus {
+    private val _failures = mutableListOf<String>()
+    val failures: List<String> get() = _failures
+
+    internal fun recordFailure(description: String) {
+        _failures += description
+    }
+}
+
 class RunnerService(
     val days: List<Day>,
     val year: Int,
@@ -20,6 +29,7 @@ class RunnerService(
                     }
                     .onFailure { error ->
                         println("Day ${day.day} | FAILED: ${error::class.simpleName}: ${error.message}")
+                        RunStatus.recordFailure("$year day ${day.day}: ${error::class.simpleName}")
                     }
             }
         }
@@ -33,6 +43,7 @@ class RunnerService(
             if (!opaqueResults) {
                 print(": $failure")
             }
+            RunStatus.recordFailure("$year day $day part $part: test failed")
         }
         println()
     }

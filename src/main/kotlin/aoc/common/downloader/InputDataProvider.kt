@@ -1,5 +1,6 @@
 package aoc.common.downloader
 
+import aoc.common.errorPrintln
 import aoc.common.toInputLines
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -8,13 +9,16 @@ import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeSource
 
 private val sessionCookie: String by lazy {
-    System.getenv("AOC_SESSION_COOKIE")
+    System.getenv("AOC_SESSION_COOKIE")?.takeIf { it.isNotBlank() }
         ?: error("Environment variable AOC_SESSION_COOKIE is not set. Please set it to your Advent of Code session cookie.")
 }
 
-private val userAgent: String = System.getenv("AOC_USER_AGENT") ?: "advent-of-code-kotlin-runner"
+private val userAgent: String = System.getenv("AOC_USER_AGENT")?.takeIf { it.isNotBlank() } ?: "advent-of-code-kotlin-runner"
 
 internal val httpClient = OkHttpClient.Builder()
     .addInterceptor { chain ->
@@ -26,7 +30,11 @@ internal val httpClient = OkHttpClient.Builder()
         )
     }
     .build()
-internal val inputDataDownloader = InputDataDownloader(httpClient)
+
+private val downloadInterval: Duration =
+    (System.getenv("AOC_DOWNLOAD_INTERVAL_SECONDS")?.toLongOrNull()?.takeIf { it >= 0 } ?: 60L).seconds
+
+internal val inputDataDownloader = InputDataDownloader(httpClient, downloadInterval)
 internal val inputDataProvider = InputDataProvider(inputDataDownloader)
 
 
@@ -50,9 +58,14 @@ class InputDataProvider(
     }
 }
 
-class InputDataDownloader(private val httpClient: OkHttpClient) {
+class InputDataDownloader(
+    private val httpClient: OkHttpClient,
+    private val minInterval: Duration = Duration.ZERO,
+) {
+    private var lastDownload: TimeSource.Monotonic.ValueTimeMark? = null
 
     fun downloadInputData(year: Int, day: Int): String {
+        throttle(year, day)
         val request = Request.Builder()
             .url("https://adventofcode.com/$year/day/$day/input")
             .build()
@@ -64,5 +77,17 @@ class InputDataDownloader(private val httpClient: OkHttpClient) {
             check(body.isNotBlank()) { "Downloaded input for $year day $day is empty" }
             body
         }
+    }
+
+    @Synchronized
+    private fun throttle(year: Int, day: Int) {
+        lastDownload?.let { last ->
+            val wait = minInterval - last.elapsedNow()
+            if (wait.isPositive()) {
+                errorPrintln("Throttling: waiting ${wait.inWholeSeconds}s before downloading input for $year day $day")
+                Thread.sleep(wait.inWholeMilliseconds)
+            }
+        }
+        lastDownload = TimeSource.Monotonic.markNow()
     }
 }

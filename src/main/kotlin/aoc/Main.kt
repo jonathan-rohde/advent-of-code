@@ -1,6 +1,7 @@
 package aoc
 
 import aoc.common.ExecutionSettings
+import aoc.common.RunStatus
 import aoc.common.Year
 import aoc.common.errorPrintln
 import aoc.years.y2015.Year2015
@@ -55,6 +56,11 @@ fun main(args: Array<String>) {
 
     ExecutionSettings.runs = options.runs
     year().execute(options.days, options.opaqueResults)
+
+    if (RunStatus.failures.isNotEmpty()) {
+        errorPrintln("${RunStatus.failures.size} failure(s):\n" + RunStatus.failures.joinToString("\n") { "  - $it" })
+        exitProcess(1)
+    }
 }
 
 private fun parseOptions(args: Array<String>): Options {
