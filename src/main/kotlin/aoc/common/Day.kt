@@ -2,9 +2,7 @@ package aoc.common
 
 import aoc.common.downloader.inputDataProvider
 import kotlin.time.Duration
-import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
-import kotlin.time.toDuration
 
 data class Part(
     val test: Any? = null,
@@ -33,16 +31,12 @@ abstract class Day(
         val hasTestsPart2 = part2?.test != null
 
         val test1Execution = if (hasTestsPart1) {
-            val testInput = part1.testInput.trim().lines()
-            executePart(testInput, true, part1, ::part1).also {
-
-            }
-        } else Pair(Pair(5.toDuration(DurationUnit.NANOSECONDS), "none"), "none")
+            executePart(part1.testInput.toInputLines(), true, part1, ::part1)
+        } else NO_TEST
 
         val test2Execution = if (hasTestsPart2) {
-            val testInput = part2.testInput.trim().lines()
-            executePart(testInput, true, part2, ::part2)
-        } else Pair(Pair(0.toDuration(DurationUnit.MILLISECONDS), "none"), "none")
+            executePart(part2.testInput.toInputLines(), true, part2, ::part2)
+        } else NO_TEST
 
         val testResults = test1Execution to test2Execution
         val test1Result = testResults.showTestResult(1)
@@ -124,6 +118,10 @@ abstract class Day(
             return lazyMessage()
         }
         return null
+    }
+
+    private companion object {
+        val NO_TEST: Pair<Pair<Duration, Any>, String?> = (Duration.ZERO to "none") to null
     }
 
     open fun part1(input: List<String>): Any = -1L

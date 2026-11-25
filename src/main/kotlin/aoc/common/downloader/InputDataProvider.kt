@@ -1,19 +1,29 @@
 package aoc.common.downloader
 
+import aoc.common.toInputLines
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
-import kotlin.io.path.createFile
 import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
-private val sessionCookie: String = System.getenv("AOC_SESSION_COOKIE")
-    ?: error("Environment variable AOC_SESSION_COOKIE is not set. Please set it to your Advent of Code session cookie.")
+private val sessionCookie: String by lazy {
+    System.getenv("AOC_SESSION_COOKIE")
+        ?: error("Environment variable AOC_SESSION_COOKIE is not set. Please set it to your Advent of Code session cookie.")
+}
+
+private val userAgent: String = System.getenv("AOC_USER_AGENT") ?: "advent-of-code-kotlin-runner"
+
 internal val httpClient = OkHttpClient.Builder()
     .addInterceptor { chain ->
-        chain.proceed(chain.request().newBuilder().addHeader("Cookie", "session=$sessionCookie").build())
+        chain.proceed(
+            chain.request().newBuilder()
+                .addHeader("Cookie", "session=$sessionCookie")
+                .header("User-Agent", userAgent)
+                .build()
+        )
     }
     .build()
 internal val inputDataDownloader = InputDataDownloader(httpClient)
@@ -31,24 +41,28 @@ class InputDataProvider(
         }
         val cacheFile = Path("data/inputs/$year/day${day.toString().padStart(2, '0')}.txt")
         if (cacheFile.exists()) {
-            return cacheFile.readText().trim().lines()
+            return cacheFile.readText().toInputLines()
         }
 
         val inputData = inputDataDownloader.downloadInputData(year, day)
-        cacheFile.createFile()
-        cacheFile.writeText(inputData.joinToString("\n"))
-        return inputData
+        cacheFile.writeText(inputData)
+        return inputData.toInputLines()
     }
 }
 
 class InputDataDownloader(private val httpClient: OkHttpClient) {
 
-    fun downloadInputData(year: Int, day: Int): List<String> {
+    fun downloadInputData(year: Int, day: Int): String {
         val request = Request.Builder()
             .url("https://adventofcode.com/$year/day/$day/input")
             .build()
-        return httpClient.newCall(request).execute().use {
-            it.body.string().trim().lines()
+        return httpClient.newCall(request).execute().use { response ->
+            val body = response.body.string()
+            check(response.isSuccessful) {
+                "Downloading input for $year day $day failed with HTTP ${response.code}: ${body.trim().take(200)}"
+            }
+            check(body.isNotBlank()) { "Downloaded input for $year day $day is empty" }
+            body
         }
     }
 }

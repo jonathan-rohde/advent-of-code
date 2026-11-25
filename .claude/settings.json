@@ -1,8 +1,22 @@
 {
   "permissions": {
+    "allow": [
+      "Edit(src/main/kotlin/aoc/common/**)",
+      "Edit(src/main/kotlin/aoc/Main.kt)",
+      "Edit(src/main/kotlin/stats/**)",
+      "Edit(src/main/kotlin/template/**)",
+      "Edit(src/main/kotlin/utils/Utils.kt)",
+      "Edit(build.gradle.kts)"
+    ],
     "deny": [
-      "Edit",
-      "Write",
+      "Edit(src/main/kotlin/aoc/years/**)",
+      "Edit(src/main/kotlin/utils/GridUtils.kt)",
+      "Edit(src/main/kotlin/utils/ListUtils.kt)",
+      "Edit(src/main/kotlin/utils/MathUtils.kt)",
+      "Edit(src/main/kotlin/utils/Matrix2x2.kt)",
+      "Edit(src/main/kotlin/utils/Json.kt)",
+      "Edit(CLAUDE.md)",
+      "Edit(.claude/**)",
       "NotebookEdit",
       "Bash(git commit:*)",
       "Bash(git add:*)",

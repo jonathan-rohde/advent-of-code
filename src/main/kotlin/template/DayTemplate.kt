@@ -5,11 +5,11 @@ import aoc.common.printResults
 
 class DayXX : Day(year = 0, day = 0) {
     override fun part1(input: List<String>): Any {
-        return -1
+        return -1L
     }
 
     override fun part2(input: List<String>): Any {
-        return -1
+        return -1L
     }
 
 }
