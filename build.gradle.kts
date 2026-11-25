@@ -1,11 +1,11 @@
 plugins {
-    kotlin("jvm") version "2.2.21"
-    kotlin("plugin.serialization") version "2.2.21"
+    kotlin("jvm") version "2.4.21"
+    kotlin("plugin.serialization") version "2.4.21"
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -48,6 +48,6 @@ sourceSets {
 
 tasks {
     wrapper {
-        gradleVersion = "8.11.1"
+        gradleVersion = "9.9.2"
     }
 }

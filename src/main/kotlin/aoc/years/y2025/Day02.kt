@@ -41,7 +41,7 @@ private fun String.parseRanges(): List<Pair<Long, Long>> {
 
 private val idCache = mutableMapOf<Long, Boolean>()
 
-private fun Long.isValidId() = idCache.getOrPut(this) {
+private fun Long.isValidId(): Boolean = idCache.getOrPut(this) {
     with(toString()) {
         if (length % 2 != 0) return true
         val (first, second) = take(length / 2) to takeLast(length / 2) // to str.substring(str.length - mid)
