@@ -1,6 +1,5 @@
 package aoc.common
 
-import kotlin.time.Duration
 import kotlin.time.measureTime
 
 class RunnerService(
@@ -13,39 +12,28 @@ class RunnerService(
         println("#########\n# $year \n#########")
         println("Day | Time")
         val overall = measureTime {
-            days.asSequence().filter { proc -> limit.isEmpty() || proc.day in limit }
-                .map { it to it.execute() }
-                .forEach { (proc, result) ->
-                    print("Day ${proc.day} part 1 | ")
-                    print(result.part1.first)
-                    result.test1Result?.let {
-                        print(" (TEST FAILED)")
-                        if (!opaqueResults) {
-                            print(": ${result.test1Result}")
-                        }
+            days.filter { limit.isEmpty() || it.day in limit }.forEach { day ->
+                runCatching { day.execute() }
+                    .onSuccess { result ->
+                        printPart(day.day, 1, result.part1, result.testPart1)
+                        printPart(day.day, 2, result.part2, result.testPart2)
                     }
-                    println("")
-                    print("Day ${proc.day} part 2 | ")
-                    print(result.part2.first)
-                    result.test2Result?.let {
-                        print(" (TEST FAILED)")
-                        if (!opaqueResults) {
-                            print(": ${result.test2Result}")
-                        }
+                    .onFailure { error ->
+                        println("Day ${day.day} | FAILED: ${error::class.simpleName}: ${error.message}")
                     }
-                    println("")
-                }
+            }
         }
-
-
-        println("Overall | ${overall}")
+        println("Overall | $overall")
     }
 
-    private fun PartResult.print() {
-        print(" $min | $max | $avg | $median" )
-    }
-
-    private fun Pair<Duration, Any>.printTestResult() {
-        print(" $second | $first")
+    private fun printPart(day: Int, part: Int, result: PartResult, test: TestResult?) {
+        print("Day $day part $part | ${result.formatTiming()}")
+        test?.failure?.let { failure ->
+            print(" (TEST FAILED)")
+            if (!opaqueResults) {
+                print(": $failure")
+            }
+        }
+        println()
     }
 }

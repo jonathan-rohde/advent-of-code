@@ -1,32 +1,38 @@
 #!/bin/zsh
+set -e
+
+if [ $# -ne 2 ]; then
+    echo "Usage: $0 <year> <day>"
+    exit 1
+fi
 
 year=$1
 day=$2
-dayLong=$day
-if [ $day -lt 10 ]; then
-    dayLong="0$day"
+dayLong=$(printf "%02d" $day)
+
+scriptDir=${0:A:h}
+directory="$scriptDir/../aoc/years/y$year"
+dayFile="$directory/Day$dayLong.kt"
+yearFile="$directory/Year$year.kt"
+
+if [ -e "$dayFile" ]; then
+    echo "$dayFile already exists"
+    exit 1
 fi
 
-directory="../aoc/years/y$year"
-resourceDirectory="../../resources/data/y$year"
+mkdir -p "$directory"
+sed -e "s/DayXX/Day$dayLong/g" \
+    -e "s/year = 0/year = $year/" \
+    -e "s/day = 0/day = $day/" \
+    -e "s/package template/package aoc.years.y$year/" \
+    "$scriptDir/DayTemplate.kt" > "$dayFile"
+git add "$dayFile"
 
-if ! [ -d $directory ]; then
-    mkdir -p $directory
+if [ -f "$yearFile" ] && grep -qE "^ *// *Day$dayLong\(\)" "$yearFile"; then
+    sed -i '' -E "s|^( *)//( *)Day$dayLong\(\)|\1\2Day$dayLong()|" "$yearFile"
+    echo "Enabled Day$dayLong() in Year$year.kt"
+elif ! grep -q "Day$dayLong()" "$yearFile" 2>/dev/null; then
+    echo "Add Day$dayLong() to Year$year.kt to run it with the year runner"
 fi
-
-if ! [ -d $resourceDirectory ]; then
-    mkdir -p $resourceDirectory
-fi
-
-cp DayTemplate.kt $directory/Day$dayLong.kt
-sed -i '' "s/DayXX/Day$dayLong/g" $directory/Day$dayLong.kt
-sed -i '' "s/year = 0/year = $year/g" $directory/Day$dayLong.kt
-sed -i '' "s/day = 0/day = $day/g" $directory/Day$dayLong.kt
-sed -i '' "s/package template/package aoc.years.y$year/g" $directory/Day$dayLong.kt
-git add $directory/Day$dayLong.kt
-
-touch $resourceDirectory/Day$dayLong.txt
-touch $resourceDirectory/Day${dayLong}_test.txt
-
 
 echo "Day $day created"

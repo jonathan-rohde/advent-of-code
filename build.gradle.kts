@@ -13,9 +13,6 @@ repositories {
     mavenCentral()
 }
 
-extra["springShellVersion"] = "3.4.0"
-
-
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")

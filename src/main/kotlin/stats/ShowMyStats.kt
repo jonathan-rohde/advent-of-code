@@ -6,14 +6,10 @@ import stats.downloader.earliestYear
 import stats.downloader.latestYear
 import stats.downloader.statsDataProvider
 import java.time.Duration
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.Month
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import kotlin.io.path.Path
-import kotlin.io.path.readText
 
 @Serializable
 private data class Stats(
@@ -41,14 +37,19 @@ private data class StarCompletion(
 
 private val json = Json { ignoreUnknownKeys = true }
 
+private val memberName: String = System.getenv("AOC_MEMBER_NAME") ?: "jonathan-rohde"
+
 fun main() {
     (earliestYear..latestYear).forEach { year ->
         println("$year")
         val jsonData = statsDataProvider.getStatsData(year)
         val obj = json.decodeFromString<Stats>(jsonData)
-        obj.members.entries.first {
-            it.value.name == "jonathan-rohde"
-        }.let { json ->
+        val member = obj.members.entries.firstOrNull { it.value.name == memberName }
+        if (member == null) {
+            println("No stars for $memberName")
+            return@forEach
+        }
+        member.let { json ->
             println("Member: ${json.value.name}, Stars: ${json.value.stars}")
             json.value.completion_day_level.entries.sortedBy { it.key }.forEach { dayEntry ->
                 val day = dayEntry.key
@@ -79,8 +80,4 @@ private fun Duration.toFormattedString(): String {
         toHours(),
         toMinutesPart(),
         toSecondsPart())
-}
-
-private fun readLineFromFile(filename: String): String {
-    return Path(filename).readText().trim()
 }

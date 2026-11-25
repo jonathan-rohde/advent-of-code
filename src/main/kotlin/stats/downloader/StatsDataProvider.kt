@@ -4,7 +4,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.time.LocalDate
 import java.time.Month
-import java.time.OffsetDateTime
+import java.time.Duration
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.deleteExisting
@@ -23,7 +23,12 @@ private val leaderboardId: String by lazy {
 }
 internal val httpClient = OkHttpClient.Builder()
     .addInterceptor { chain ->
-        chain.proceed(chain.request().newBuilder().addHeader("Cookie", "session=$sessionCookie").build())
+        chain.proceed(
+            chain.request().newBuilder()
+                .addHeader("Cookie", "session=$sessionCookie")
+                .header("User-Agent", System.getenv("AOC_USER_AGENT") ?: "advent-of-code-kotlin-runner")
+                .build()
+        )
     }
     .build()
 internal val statsDataDownloader = StatsDataDownloader(httpClient)
@@ -49,10 +54,8 @@ class StatsDataProvider(
         }
         val cacheFile = Path("$cacheDir/$year.json")
         if (cacheFile.exists()) {
-            // check age
-            val age = cacheFile.getLastModifiedTime()
-            val distance = latestYear - year
-            val useCache = age.toMillis() > cachableDate(distance)
+            val age = Duration.ofMillis(System.currentTimeMillis() - cacheFile.getLastModifiedTime().toMillis())
+            val useCache = age < cacheDuration
             val cached = cacheFile.readText().trim()
             if (useCache && cached.looksLikeJsonObject()) {
                 return cached
@@ -65,9 +68,7 @@ class StatsDataProvider(
         return inputData
     }
 
-    private fun cachableDate(distance: Int): Long =
-        OffsetDateTime.now().withMinute(0).withSecond(0).withNano(0).minusMonths(distance.toLong())
-            .toEpochSecond() * 1000
+    private val cacheDuration = Duration.ofMinutes(15)
 }
 
 class StatsDataDownloader(private val httpClient: OkHttpClient) {

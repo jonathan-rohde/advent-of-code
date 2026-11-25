@@ -2,18 +2,6 @@ package aoc.years.y2015
 
 import aoc.common.RunnerService
 import aoc.common.Year
-import aoc.years.y2025.Day01
-import aoc.years.y2025.Day02
-import aoc.years.y2025.Day03
-import aoc.years.y2025.Day04
-import aoc.years.y2025.Day05
-import aoc.years.y2025.Day06
-import aoc.years.y2025.Day07
-import aoc.years.y2025.Day08
-import aoc.years.y2025.Day09
-import aoc.years.y2025.Day10
-import aoc.years.y2025.Day11
-import aoc.years.y2025.Day12
 
 class Year2015 : Year {
     override fun execute(days: List<Int>, opaqueResults: Boolean) {
@@ -46,7 +34,7 @@ class Year2015 : Year {
                 Day24(),
                 Day25()
                 ),
-            year = 2025,
+            year = 2015,
             opaqueResults = opaqueResults
         )
         runner.execute(limit = days)

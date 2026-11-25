@@ -6,3 +6,4 @@ src/**/*.txt
 src/**/resources/stats
 local.properties
 data/**
+*.hprof

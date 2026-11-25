@@ -2,6 +2,7 @@ package aoc.common
 
 import aoc.common.downloader.inputDataProvider
 import kotlin.time.Duration
+import kotlin.time.TimedValue
 import kotlin.time.measureTimedValue
 
 data class Part(
@@ -17,112 +18,51 @@ abstract class Day(
     val test: Pair<Any?, Any?>? = null to null,
     val part1: Part? = null,
     val part2: Part? = null,
-
-//    val testFile1: String = "Day${day.toString().padStart(2, '0')}_test",
-//    val testFile2: String = "Day${day.toString().padStart(2, '0')}_test",
-//    val testLimit1: Int = 0,
-//    val limit1: Int = 0,
-//    val testLimit2: Int = 0,
-//    val limit2: Int = 0
 ) {
 
-    fun execute(): Result {
-        val hasTestsPart1 = part1?.test != null
-        val hasTestsPart2 = part2?.test != null
+    fun execute(runs: Int = ExecutionSettings.runs): Result {
+        require(runs > 0) { "runs must be positive, was $runs" }
 
-        val test1Execution = if (hasTestsPart1) {
-            executePart(part1.testInput.toInputLines(), true, part1, ::part1)
-        } else NO_TEST
-
-        val test2Execution = if (hasTestsPart2) {
-            executePart(part2.testInput.toInputLines(), true, part2, ::part2)
-        } else NO_TEST
-
-        val testResults = test1Execution to test2Execution
-        val test1Result = testResults.showTestResult(1)
-        val test2Result = testResults.showTestResult(2)
-
-        val nonNullpart1 = part1 ?: Part(test = test?.first, testInput = "")
-        val nonNullPart2 = part2 ?: Part(test = test?.second, testInput = "")
-
-
+        val testPart1 = part1?.let { runTest(it, ::part1) }
+        val testPart2 = part2?.let { runTest(it, ::part2) }
 
         val input = inputDataProvider.getInputData(year, day)
-
-        val part1 = executePart(input, false, nonNullpart1, ::part1)
-        val part2 = executePart(input, false, nonNullPart2, ::part2)
-
-        part1.first.second.warnOverflow(1)
-        part2.first.second.warnOverflow(2)
-
-
+        val part1Result = runPart(input, part1?.limit ?: 0, runs, ::part1).also { it.warn(1) }
+        val part2Result = runPart(input, part2?.limit ?: 0, runs, ::part2).also { it.warn(2) }
 
         return Result(
-            testPart1 = testResults.first.first,
-            test1Result = test1Result,
-            testPart2 = testResults.second.first,
-            test2Result = test2Result,
-            part1 = part1.first,
-            part2 = part2.first
+            testPart1 = testPart1,
+            testPart2 = testPart2,
+            part1 = part1Result,
+            part2 = part2Result
         )
     }
 
-    private fun Any.warnOverflow(part: Int) {
-        when (this) {
+    private fun runTest(part: Part, partFunction: (List<String>, Int) -> Any): TestResult? {
+        val expected = part.test ?: return null
+        val (value, duration) = measureTimedValue { partFunction(part.testInput.toInputLines(), part.testLimit) }
+        val failure = if (value == expected) {
+            null
+        } else {
+            "expected $expected (${expected.typeName()}) but was $value (${value.typeName()})"
+        }
+        return TestResult(value = value, duration = duration, failure = failure)
+    }
+
+    private fun runPart(input: List<String>, limit: Int, runs: Int, partFunction: (List<String>, Int) -> Any): PartResult =
+        List(runs) { measureTimedValue { partFunction(input, limit) } }.toPartResult()
+
+    private fun PartResult.warn(part: Int) {
+        when (value) {
             is Int -> errorPrintln("Day $day, Part $part 🔥 Part returned Int, consider using Long to avoid overflow.")
             is Float -> errorPrintln("Day $day, Part $part 🔥 Part returned Float, consider using Double or BigDecimal to avoid overflow.")
         }
-    }
-
-    private fun Pair<Pair<Pair<Duration, Any>, String?>, Pair<Pair<Duration, Any>, String?>>.showTestResult(part: Int): String? {
-        val hasTestFailure = if (part == 1) {
-            this.first.second != null
-        } else {
-            this.second.second != null
+        if (distinct.size > 1) {
+            errorPrintln("Day $day, Part $part ⚠️ Part returned ${distinct.size} different results across $runs runs.")
         }
-
-        if (!hasTestFailure) {
-            return null
-        }
-        return "(${if (part == 1) this.first.second else this.second.second})"
     }
 
-    private fun executePart(input: List<String>, test: Boolean, part: Part, partFunction: (List<String>, Int) -> Any): Pair<Pair<Duration, Any>, String?> {
-        val limit = if (test) part.testLimit else part.limit
-        val result = measureTimedValue { partFunction(input, limit) }
-
-        val testResultOutput = if (test) {
-            check(result.value == part.test) {
-                "expected ${part.test}"
-            }
-        } else null
-
-        return (result.duration to result.value) to testResultOutput
-    }
-
-//    private fun executePart1(input: List<String>, test: Boolean = false) : Pair<Pair<Duration, Any>, String?> {
-//        val limit = if (test) part1.testLimit else part1.limit
-//        val result = measureTimedValue { part1(input, limit) }
-//
-//        val testResultOutput = if (test) {
-//            check(result.value == part1.test) {
-//                "expected ${part1.test}"
-//            }
-//        } else null
-//
-//        return (result.duration to result.value) to testResultOutput
-//    }
-
-    private fun check(condition: Boolean, lazyMessage: () -> String): String? {
-        if (!condition) {
-            return lazyMessage()
-        }
-        return null
-    }
-
-    private companion object {
-        val NO_TEST: Pair<Pair<Duration, Any>, String?> = (Duration.ZERO to "none") to null
-    }
+    private fun Any.typeName(): String = this::class.simpleName ?: "unknown type"
 
     open fun part1(input: List<String>): Any = -1L
     open fun part2(input: List<String>): Any = -1L
@@ -131,41 +71,60 @@ abstract class Day(
     open fun part2(input: List<String>, limit: Int): Any = part2(if (limit > 0) input.take(limit) else input)
 }
 
-data class Result(
-    val testPart1: Pair<Duration, Any>?,
-    val testPart2: Pair<Duration, Any>?,
-    val test1Result: String? = null,
-    val test2Result: String? = null,
-    val part1: Pair<Duration, Any>,
-    val part2: Pair<Duration, Any>
+data class TestResult(
+    val value: Any,
+    val duration: Duration,
+    val failure: String?
 )
 
 data class PartResult(
+    val runs: Int,
     val min: Duration,
     val max: Duration,
     val avg: Duration,
     val median: Duration,
-
     val distinct: Set<Any>
+) {
+    val value: Any get() = distinct.first()
+
+    fun formatTiming(): String =
+        if (runs == 1) "$min" else "min $min | avg $avg | median $median | max $max ($runs runs)"
+}
+
+private fun List<TimedValue<Any>>.toPartResult(): PartResult {
+    val durations = map { it.duration }.sorted()
+    val middle = durations.size / 2
+    val median = if (durations.size % 2 == 1) durations[middle] else (durations[middle - 1] + durations[middle]) / 2
+    return PartResult(
+        runs = size,
+        min = durations.first(),
+        max = durations.last(),
+        avg = durations.fold(Duration.ZERO, Duration::plus) / size,
+        median = median,
+        distinct = mapTo(linkedSetOf()) { it.value }
+    )
+}
+
+data class Result(
+    val testPart1: TestResult?,
+    val testPart2: TestResult?,
+    val part1: PartResult,
+    val part2: PartResult
 )
 
 fun Result.printResults() {
-    val testPart1Text = if (test1Result != null) {
-        "${testPart1?.second} $test1Result"
-    } else {
-        "${testPart1?.second}"
-    }
-    val testPart2Text = if (test2Result != null) {
-        "${testPart2?.second} $test2Result"
-    } else {
-        "${testPart2?.second}"
-    }
     println("""
         -------- Results --------
-        Test Part 1: $testPart1Text (${testPart1?.first})
-        Test Part 2: $testPart2Text (${testPart2?.first})
-        
-        Part 1: ${part1.second} (${part1.first})
-        Part 2: ${part2.second} (${part2.first})
+        Test Part 1: ${testPart1.format()}
+        Test Part 2: ${testPart2.format()}
+
+        Part 1: ${part1.value} (${part1.formatTiming()})
+        Part 2: ${part2.value} (${part2.formatTiming()})
     """.trimIndent())
+}
+
+private fun TestResult?.format(): String = when {
+    this == null -> "none"
+    failure == null -> "$value ($duration)"
+    else -> "$value ($failure) ($duration)"
 }
