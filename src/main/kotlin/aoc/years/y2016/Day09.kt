@@ -19,34 +19,33 @@ class Day09 : Day(
     part2 = Part(test = 20L, testInput = testInput),
 ) {
     override fun part1(input: List<String>): Any {
-        return solve(input[0], MODE.SIMPLE)
+        return solve(input[0], Mode.SIMPLE)
     }
 
     override fun part2(input: List<String>): Any {
-        return solve(input[0], MODE.EXTENDED)
+        return solve(input[0], Mode.EXTENDED)
     }
 
-    private fun solve(input: String, mode: MODE): Long {
-        if (input.isEmpty()) return 0L
-        if (input[0] != '(') return 1L + solve(input.substring(1), mode)
+    private val encoderPattern = """\((\d+)x(\d+)\)(.*)""".toRegex()
 
-        val (len, times, remaining) = ("\\(([0-9]+)x([0-9]+)\\)(.*)".toRegex().matchEntire(input)?.destructured )?.let {
-            (l, t, r) -> Triple(l.toInt(), t.toInt(), r)
+    private fun solve(input: String, mode: Mode): Long {
+        val plainChars = input.indexOf('(')
+        if (plainChars > 0) return plainChars + solve(input.substring(plainChars), mode)
+        if (plainChars == -1) return input.length.toLong()
+
+        val (len, times, remaining) = encoderPattern.matchEntire(input)?.destructured?.let { (l, t, r) ->
+            Triple(l.toInt(), t.toInt(), r)
         } ?: return 0L
 
-        return when (mode) {
-            MODE.SIMPLE -> len * times + solve(remaining.drop(len), mode)
-            MODE.EXTENDED -> {
-                val recursionString = remaining.take(len)
-                if (!recursionString.contains("(")) return len * times + solve(remaining.drop(len), mode)
-                val subSolve = solve(recursionString, mode)
-
-                times * subSolve + solve(remaining.drop(len), mode)
-            }
+        val sectionLength = when (mode) {
+            Mode.SIMPLE -> len.toLong()
+            Mode.EXTENDED -> solve(remaining.take(len), mode)
         }
+
+        return times * sectionLength + solve(remaining.drop(len), mode)
     }
 
-    private enum class MODE {
+    private enum class Mode {
         SIMPLE, EXTENDED
     }
 }
