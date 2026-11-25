@@ -23,20 +23,24 @@ abstract class Day(
     fun execute(runs: Int = ExecutionSettings.runs): Result {
         require(runs > 0) { "runs must be positive, was $runs" }
 
-        val testPart1 = part1?.let { runTest(it, ::part1) }
-        val testPart2 = part2?.let { runTest(it, ::part2) }
+        val tests = executeTests()
 
         val input = inputDataProvider.getInputData(year, day)
         val part1Result = runPart(input, part1?.limit ?: 0, runs, ::part1).also { it.warn(1) }
         val part2Result = runPart(input, part2?.limit ?: 0, runs, ::part2).also { it.warn(2) }
 
         return Result(
-            testPart1 = testPart1,
-            testPart2 = testPart2,
+            testPart1 = tests.testPart1,
+            testPart2 = tests.testPart2,
             part1 = part1Result,
             part2 = part2Result
         )
     }
+
+    fun executeTests(): TestResults = TestResults(
+        testPart1 = part1?.let { runTest(it, ::part1) },
+        testPart2 = part2?.let { runTest(it, ::part2) },
+    )
 
     private fun runTest(part: Part, partFunction: (List<String>, Int) -> Any): TestResult? {
         val expected = part.test ?: return null
@@ -70,6 +74,11 @@ abstract class Day(
     open fun part1(input: List<String>, limit: Int): Any = part1(if (limit > 0) input.take(limit) else input)
     open fun part2(input: List<String>, limit: Int): Any = part2(if (limit > 0) input.take(limit) else input)
 }
+
+data class TestResults(
+    val testPart1: TestResult?,
+    val testPart2: TestResult?
+)
 
 data class TestResult(
     val value: Any,

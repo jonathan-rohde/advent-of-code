@@ -1,6 +1,5 @@
 package aoc.common.downloader
 
-import aoc.common.errorPrintln
 import aoc.common.toInputLines
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -9,9 +8,6 @@ import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.TimeSource
 
 private val sessionCookie: String by lazy {
     System.getenv("AOC_SESSION_COOKIE")?.takeIf { it.isNotBlank() }
@@ -30,11 +26,7 @@ internal val httpClient = OkHttpClient.Builder()
         )
     }
     .build()
-
-private val downloadInterval: Duration =
-    (System.getenv("AOC_DOWNLOAD_INTERVAL_SECONDS")?.toLongOrNull()?.takeIf { it >= 0 } ?: 60L).seconds
-
-internal val inputDataDownloader = InputDataDownloader(httpClient, downloadInterval)
+internal val inputDataDownloader = InputDataDownloader(httpClient)
 internal val inputDataProvider = InputDataProvider(inputDataDownloader)
 
 
@@ -58,14 +50,9 @@ class InputDataProvider(
     }
 }
 
-class InputDataDownloader(
-    private val httpClient: OkHttpClient,
-    private val minInterval: Duration = Duration.ZERO,
-) {
-    private var lastDownload: TimeSource.Monotonic.ValueTimeMark? = null
+class InputDataDownloader(private val httpClient: OkHttpClient) {
 
     fun downloadInputData(year: Int, day: Int): String {
-        throttle(year, day)
         val request = Request.Builder()
             .url("https://adventofcode.com/$year/day/$day/input")
             .build()
@@ -77,17 +64,5 @@ class InputDataDownloader(
             check(body.isNotBlank()) { "Downloaded input for $year day $day is empty" }
             body
         }
-    }
-
-    @Synchronized
-    private fun throttle(year: Int, day: Int) {
-        lastDownload?.let { last ->
-            val wait = minInterval - last.elapsedNow()
-            if (wait.isPositive()) {
-                errorPrintln("Throttling: waiting ${wait.inWholeSeconds}s before downloading input for $year day $day")
-                Thread.sleep(wait.inWholeMilliseconds)
-            }
-        }
-        lastDownload = TimeSource.Monotonic.markNow()
     }
 }

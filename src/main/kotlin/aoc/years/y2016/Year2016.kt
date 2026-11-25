@@ -40,3 +40,7 @@ class Year2016 : Year {
         runner.execute(limit = days)
     }
 }
+
+fun main() {
+    Year2016().execute(days = (1..9).toList(), false)
+}

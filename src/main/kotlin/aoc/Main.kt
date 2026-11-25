@@ -28,6 +28,7 @@ private val usage = """
       --day <days>      only run these days, e.g. "1,2,5" (default: all)
       --runs <n>        run each part n times and show min/avg/median/max (default: 1)
       --show-results    show test failure details
+      --test-only       only run the sample tests, never load or download the real input
       --help            show this help
 """.trimIndent()
 
@@ -36,6 +37,7 @@ private data class Options(
     val days: List<Int> = emptyList(),
     val runs: Int = ExecutionSettings.runs,
     val opaqueResults: Boolean = true,
+    val testOnly: Boolean = false,
     val help: Boolean = false,
 )
 
@@ -55,6 +57,7 @@ fun main(args: Array<String>) {
     }
 
     ExecutionSettings.runs = options.runs
+    ExecutionSettings.testOnly = options.testOnly
     year().execute(options.days, options.opaqueResults)
 
     if (RunStatus.failures.isNotEmpty()) {
@@ -72,6 +75,7 @@ private fun parseOptions(args: Array<String>): Options {
             "--day" -> options.copy(days = iterator.daysValue(arg))
             "--runs" -> options.copy(runs = iterator.intValue(arg).also { require(it > 0) { "--runs must be at least 1" } })
             "--show-results" -> options.copy(opaqueResults = false)
+            "--test-only" -> options.copy(testOnly = true)
             "--help", "-h" -> options.copy(help = true)
             else -> throw IllegalArgumentException("Unknown argument: $arg")
         }

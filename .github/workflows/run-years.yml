@@ -1,0 +1,56 @@
+name: Test AoC years
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "build.gradle.kts"
+      - "settings.gradle.kts"
+      - "gradle/**"
+      - ".github/workflows/run-years.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    name: Discover years
+    runs-on: ubuntu-latest
+    outputs:
+      years: ${{ steps.years.outputs.years }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: years
+        name: List implemented years
+        run: |
+          years=$(ls -d src/main/kotlin/aoc/years/y*/ | sed -E 's#.*/y([0-9]{4})/#\1#' | jq -R 'tonumber' | jq -cs .)
+          echo "Found years: $years"
+          echo "years=$years" >> "$GITHUB_OUTPUT"
+
+  run:
+    name: Year ${{ matrix.year }}
+    needs: discover
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        year: ${{ fromJson(needs.discover.outputs.years) }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - uses: gradle/actions/setup-gradle@v5
+
+      - name: Test ${{ matrix.year }}
+        run: ./gradlew run --quiet --args="--year ${{ matrix.year }} --test-only"
