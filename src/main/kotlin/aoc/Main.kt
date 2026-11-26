@@ -9,6 +9,7 @@ import aoc.years.y2016.Year2016
 import aoc.years.y2023.Year2023
 import aoc.years.y2024.Year2024
 import aoc.years.y2025.Year2025
+import aoc.years.y2026.Year2026
 import utils.toIntList
 import java.time.LocalDate
 import java.time.Month
@@ -20,6 +21,7 @@ private val years: Map<Int, () -> Year> = mapOf(
     2023 to ::Year2023,
     2024 to ::Year2024,
     2025 to ::Year2025,
+    2026 to ::Year2026,
 )
 
 private val usage = """
