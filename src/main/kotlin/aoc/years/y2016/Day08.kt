@@ -19,7 +19,7 @@ private val testInput = """
 class Day08 : Day(
     year = 2016,
     day = 8,
-    part1 = Part(test = 2, testInput = testInput),
+    part1 = Part(test = 6, testInput = testInput),
     part2 = Part(test = null, testInput = ""),
 ) {
     override fun part1(input: List<String>): Any {
