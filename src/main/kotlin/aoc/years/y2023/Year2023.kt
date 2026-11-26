@@ -25,7 +25,7 @@ class Year2023 : Year {
                 Day15(),
                 Day16()
             ),
-            year = 2024,
+            year = 2023,
             opaqueResults = opaqueResults
         )
         runner.execute(limit = days)

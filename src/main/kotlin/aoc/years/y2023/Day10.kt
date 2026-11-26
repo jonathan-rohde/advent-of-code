@@ -6,7 +6,14 @@ import aoc.common.printResults
 import utils.gaussArea
 import java.util.*
 
-private val testInput = """
+private val testInput1 = """
+    ..F7.
+    .FJ|.
+    SJ.L7
+    |F--J
+    LJ...
+""".trimIndent()
+private val testInput2 = """
     ...........
     .S-------7.
     .|F-----7|.
@@ -21,8 +28,8 @@ private val testInput = """
 class Day10 : Day(
     year = 2023,
     day = 10,
-    part1 = Part(test = 8, testInput = testInput),
-    part2 = Part(test = 10, testInput = testInput)
+    part1 = Part(test = 8, testInput = testInput1),
+    part2 = Part(test = 4L, testInput = testInput2)
 ) {
     override fun part1(input: List<String>): Any {
         val start = input.find("S")!!
@@ -32,16 +39,16 @@ class Day10 : Day(
     override fun part2(input: List<String>): Any {
         val start = input.find("S")!!
         val path = input.findFarthest(start).second.map { it.first.toLong() to it.second.toLong() }
-        input.indices.forEach { y ->
-            input[y].indices.forEach { x ->
-                if (path.contains(x.toLong() to y.toLong())) {
-                    print("#")
-                } else {
-                    print(".")
-                }
-            }
-            println()
-        }
+//        input.indices.forEach { y ->
+//            input[y].indices.forEach { x ->
+//                if (path.contains(x.toLong() to y.toLong())) {
+//                    print("#")
+//                } else {
+//                    print(".")
+//                }
+//            }
+//            println()
+//        }
         return path.gaussArea(includeEdge = false)
     }
 
