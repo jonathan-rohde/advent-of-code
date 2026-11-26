@@ -52,5 +52,22 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v5
 
-      - name: Test ${{ matrix.year }}
-        run: ./gradlew run --quiet --args="--year ${{ matrix.year }} --test-only"
+      - name: Restore puzzle data
+        uses: actions/cache/restore@v4
+        with:
+          path: data
+          key: aoc-data-${{ matrix.year }}-${{ github.run_id }}
+          restore-keys: aoc-data-${{ matrix.year }}-
+
+      - name: Verify ${{ matrix.year }}
+        env:
+          AOC_SESSION_COOKIE: ${{ secrets.AOC_SESSION_COOKIE }}
+          AOC_USER_AGENT: ${{ secrets.AOC_USER_AGENT }}
+        run: ./gradlew run --quiet --args="--year ${{ matrix.year }} --verify"
+
+      - name: Save puzzle data
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data
+          key: aoc-data-${{ matrix.year }}-${{ github.run_id }}

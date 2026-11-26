@@ -31,6 +31,7 @@ private val usage = """
       --runs <n>        run each part n times and show min/avg/median/max (default: 1)
       --show-results    show test failure details
       --test-only       only run the sample tests, never load or download the real input
+      --verify          compare real-input results with your accepted answers from the puzzle page
       --help            show this help
 """.trimIndent()
 
@@ -40,6 +41,7 @@ private data class Options(
     val runs: Int = ExecutionSettings.runs,
     val opaqueResults: Boolean = true,
     val testOnly: Boolean = false,
+    val verify: Boolean = false,
     val help: Boolean = false,
 )
 
@@ -60,6 +62,7 @@ fun main(args: Array<String>) {
 
     ExecutionSettings.runs = options.runs
     ExecutionSettings.testOnly = options.testOnly
+    ExecutionSettings.verify = options.verify
     year().execute(options.days, options.opaqueResults)
 
     if (RunStatus.failures.isNotEmpty()) {
@@ -78,10 +81,12 @@ private fun parseOptions(args: Array<String>): Options {
             "--runs" -> options.copy(runs = iterator.intValue(arg).also { require(it > 0) { "--runs must be at least 1" } })
             "--show-results" -> options.copy(opaqueResults = false)
             "--test-only" -> options.copy(testOnly = true)
+            "--verify" -> options.copy(verify = true)
             "--help", "-h" -> options.copy(help = true)
             else -> throw IllegalArgumentException("Unknown argument: $arg")
         }
     }
+    require(!(options.testOnly && options.verify)) { "--test-only and --verify cannot be combined" }
     return options
 }
 

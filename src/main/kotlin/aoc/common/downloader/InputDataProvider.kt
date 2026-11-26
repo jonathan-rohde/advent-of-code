@@ -16,8 +16,19 @@ private val sessionCookie: String by lazy {
 
 private val userAgent: String = System.getenv("AOC_USER_AGENT")?.takeIf { it.isNotBlank() } ?: "advent-of-code-kotlin-runner"
 
+private const val MIN_REQUEST_INTERVAL_MS = 1000L
+private var lastRequestAt = 0L
+
+@Synchronized
+private fun throttle() {
+    val wait = lastRequestAt + MIN_REQUEST_INTERVAL_MS - System.currentTimeMillis()
+    if (wait > 0) Thread.sleep(wait)
+    lastRequestAt = System.currentTimeMillis()
+}
+
 internal val httpClient = OkHttpClient.Builder()
     .addInterceptor { chain ->
+        throttle()
         chain.proceed(
             chain.request().newBuilder()
                 .addHeader("Cookie", "session=$sessionCookie")

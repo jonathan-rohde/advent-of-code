@@ -31,8 +31,8 @@ class RunnerService(
     private fun executeDay(day: Day) {
         runCatching { day.execute() }
             .onSuccess { result ->
-                printPart(day.day, 1, result.part1, result.testPart1)
-                printPart(day.day, 2, result.part2, result.testPart2)
+                printPart(day.day, 1, result.part1, result.testPart1, result.answerPart1)
+                printPart(day.day, 2, result.part2, result.testPart2, result.answerPart2)
             }
             .onFailure { error -> printFailure(day, error) }
     }
@@ -61,10 +61,25 @@ class RunnerService(
         println()
     }
 
-    private fun printPart(day: Int, part: Int, result: PartResult, test: TestResult?) {
+    private fun printPart(day: Int, part: Int, result: PartResult, test: TestResult?, answer: AnswerCheck?) {
         print("Day $day part $part | ${result.formatTiming()}")
         test?.let { printTestFailure(day, part, it) }
+        answer?.let { printAnswerCheck(day, part, it) }
         println()
+    }
+
+    private fun printAnswerCheck(day: Int, part: Int, answer: AnswerCheck) {
+        when {
+            answer.expected == null -> print(" | no accepted answer")
+            answer.failure == null -> print(" | answer ✅")
+            else -> {
+                print(" (ANSWER MISMATCH)")
+                if (!opaqueResults) {
+                    print(": ${answer.failure}")
+                }
+                RunStatus.recordFailure("$year day $day part $part: answer mismatch")
+            }
+        }
     }
 
     private fun printTestFailure(day: Int, part: Int, test: TestResult) {
