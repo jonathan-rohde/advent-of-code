@@ -12,8 +12,8 @@ fun main() {
 class Day01 : Day(
     year = 2015,
     day = 1,
-    part1 = Part(test = -3, testInput = ")())())"),
-    part2 = Part(test = -3, testInput = "()())"),
+    part1 = Part(test = 3, testInput = "))((((("),
+    part2 = Part(test = 5, testInput = "()())"),
 ) {
     override fun part1(input: List<String>): Any {
         return input[0].determineFloor()
