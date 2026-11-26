@@ -16,9 +16,6 @@ private val testInput = """
     rotate column x=1 by 1
 """.trimIndent()
 
-private val testInputReal = inputDataProvider.getInputData(2016, 8).joinToString("\n")
-
-
 class Day08 : Day(
     year = 2016,
     day = 8,
@@ -31,7 +28,6 @@ class Day08 : Day(
 
     override fun part2(input: List<String>): Any {
         val lights = input.getLights()
-//        lights.show()
         val signs = lights.cutInChars()
         return signs.decipher()
     }
